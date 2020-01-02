@@ -34,7 +34,7 @@ namespace SantapanApi
             services.AddDbContext<SantapanDbContext>(
                 options => options.UseInMemoryDatabase("santapanapidb"));
 
-            services.AddIdentity<IdentityUser, IdentityRole>();
+            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<SantapanDbContext>();
 
             services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -53,7 +53,7 @@ namespace SantapanApi
 
             app.UseRouting();
 
-            //app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
