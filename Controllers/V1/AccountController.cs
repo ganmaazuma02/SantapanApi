@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SantapanApi.Contracts.Requests;
-using SantapanApi.Contracts.Responses;
+using SantapanApi.Contracts.V1;
+using SantapanApi.Contracts.V1.Requests;
+using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Models;
 using SantapanApi.Services;
 
-namespace SantapanApi.Controllers
+namespace SantapanApi.V1.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -23,7 +23,7 @@ namespace SantapanApi.Controllers
             this.accountService = accountService;
         }
 
-        [HttpPost("register")]
+        [HttpPost(ApiRoutes.Account.Register)]
         public async Task<ActionResult> Register([FromBody] UserRegistrationRequest request)
         {
             // validate response model state
@@ -54,7 +54,7 @@ namespace SantapanApi.Controllers
 
         }
 
-        [HttpPost("login")]
+        [HttpPost(ApiRoutes.Account.Login)]
         public async Task<ActionResult> Login([FromBody] UserLoginRequest request)
         {
             // validate response model state
@@ -77,7 +77,7 @@ namespace SantapanApi.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("me")]
+        [HttpGet(ApiRoutes.Account.Me)]
         public async Task<ActionResult> Me()
         {
             //var user = User.Identity.Name;

@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
 using SantapanApi.Models;
 using SantapanApi.Services;
+using Microsoft.OpenApi.Models;
 
 namespace SantapanApi
 {
@@ -84,6 +85,11 @@ namespace SantapanApi
             services.AddRouting(options => options.LowercaseUrls = true);
 
             services.AddControllers();
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo() { Title = "Santapan API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,6 +99,19 @@ namespace SantapanApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            var swaggerOptions = new SwaggerOptions();
+            Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
+
+            app.UseSwagger(options =>
+            {
+                options.RouteTemplate = swaggerOptions.JsonRoute;
+            });
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint(swaggerOptions.UiEndpoint, swaggerOptions.Description);
+            });
 
             app.UseHttpsRedirection();
 

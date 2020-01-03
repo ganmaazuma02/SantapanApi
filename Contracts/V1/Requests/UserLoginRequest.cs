@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Contracts.Requests
+namespace SantapanApi.Contracts.V1.Requests
 {
     public class UserLoginRequest
     {
