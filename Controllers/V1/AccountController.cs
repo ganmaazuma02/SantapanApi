@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
 using SantapanApi.Contracts.V1.Responses;
-using SantapanApi.Models;
 using SantapanApi.Services;
 
 namespace SantapanApi.V1.Controllers

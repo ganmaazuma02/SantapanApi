@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
-using SantapanApi.Models;
+using SantapanApi.Domain;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;

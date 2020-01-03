@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Domain
+namespace SantapanApi.Contracts.V1.Responses
 {
-    public class Catering
+    public class CreateCateringSuccessResponse
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Details { get; set; }
     }
 }

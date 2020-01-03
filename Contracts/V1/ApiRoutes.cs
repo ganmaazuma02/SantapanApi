@@ -24,5 +24,14 @@ namespace SantapanApi.Contracts.V1
             public const string Login = Base + "/account/login";
             public const string Me = Base + "/account/me";
         }
+
+        public static class Caterings
+        {
+            public const string GetAll = Base + "/caterings";
+            public const string Get = Base + "/caterings/{cateringId}";
+            public const string Update = Base + "/caterings/{cateringId}";
+            public const string Delete = Base + "/caterings/{cateringId}";
+            public const string Create = Base + "/caterings";
+        }
     }
 }

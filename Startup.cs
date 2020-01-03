@@ -16,9 +16,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
-using SantapanApi.Models;
 using SantapanApi.Services;
 using Microsoft.OpenApi.Models;
+using SantapanApi.Data;
 
 namespace SantapanApi
 {
@@ -41,6 +41,7 @@ namespace SantapanApi
 
             // register dependency injection services
             services.AddScoped<IAccountService, DefaultAccountService>();
+            services.AddScoped<ICateringService, DefaultCateringService>();
 
             // set no automatic model validation
             services.Configure<ApiBehaviorOptions>(options =>
