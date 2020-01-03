@@ -16,5 +16,6 @@ namespace SantapanApi.Data
         }
 
         public DbSet<Catering> Caterings { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

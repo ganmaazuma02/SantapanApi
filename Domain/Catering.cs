@@ -14,7 +14,7 @@ namespace SantapanApi.Domain
         public string Details { get; set; }
         public string UserId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
+        //[ForeignKey(nameof(UserId))]
+        //public IdentityUser User { get; set; }
     }
 }

@@ -44,7 +44,7 @@ namespace SantapanApi.V1.Controllers
             var authResponse = await accountService.RegisterAsync(request.Email, request.Password);
 
             if (authResponse.Success)
-                return Ok(new AuthSuccessResponse() { Token = authResponse.Token });
+                return Ok(new AuthSuccessResponse() { Token = authResponse.Token, RefreshToken = authResponse.RefreshToken });
 
             return BadRequest(new AuthFailedResponse() 
             { 
@@ -67,7 +67,23 @@ namespace SantapanApi.V1.Controllers
             var authResponse = await accountService.LoginAsync(request.Email, request.Password);
 
             if (authResponse.Success)
-                return Ok(new AuthSuccessResponse() { Token = authResponse.Token });
+                return Ok(new AuthSuccessResponse() { Token = authResponse.Token, RefreshToken = authResponse.RefreshToken });
+
+            return BadRequest(new AuthFailedResponse()
+            {
+                Errors = authResponse.Errors
+            });
+
+        }
+
+        [HttpPost(ApiRoutes.Account.Refresh)]
+        public async Task<ActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        {
+
+            var authResponse = await accountService.RefreshTokenAsync(request.Token, request.RefreshToken);
+
+            if (authResponse.Success)
+                return Ok(new AuthSuccessResponse() { Token = authResponse.Token, RefreshToken = authResponse.RefreshToken });
 
             return BadRequest(new AuthFailedResponse()
             {

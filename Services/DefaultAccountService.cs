@@ -1,7 +1,9 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
+using SantapanApi.Data;
 using SantapanApi.Domain;
 using System;
 using System.Collections.Generic;
@@ -16,16 +18,19 @@ namespace SantapanApi.Services
     public class DefaultAccountService : IAccountService
     {
         private readonly UserManager<IdentityUser> userManager;
-        //private readonly SignInManager<IdentityUser> signInManager;
+        private readonly TokenValidationParameters tokenValidationParameters;
         private readonly JwtSettings jwtSettings;
+        private readonly SantapanDbContext context;
 
         public DefaultAccountService(UserManager<IdentityUser> userManager,
-            //SignInManager<IdentityUser> signInManager,
-            JwtSettings jwtSettings)
+            TokenValidationParameters tokenValidationParameters,
+            JwtSettings jwtSettings,
+            SantapanDbContext context)
         {
             this.userManager = userManager;
-            //this.signInManager = signInManager;
+            this.tokenValidationParameters = tokenValidationParameters;
             this.jwtSettings = jwtSettings;
+            this.context = context;
         }
 
         public async Task<GetUserResult> GetUserAsync(string userId)
@@ -73,7 +78,7 @@ namespace SantapanApi.Services
                 };
 
             //await signInManager.SignInAsync(user, isPersistent: false);
-            return GenerateAuthenticationResultForUser(user);
+            return await GenerateAuthenticationResultForUserAsync(user);
         }
 
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
@@ -94,14 +99,89 @@ namespace SantapanApi.Services
             }
 
             //await signInManager.SignInAsync(user, isPersistent: false);
-            return GenerateAuthenticationResultForUser(user);
+            return await GenerateAuthenticationResultForUserAsync(user);
 
         }
 
-        private AuthenticationResult GenerateAuthenticationResultForUser(IdentityUser user)
+
+        public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
+        {
+            var validatedToken = GetPrincipalFromToken(token);
+
+            if (validatedToken == null)
+                return new AuthenticationResult() { Errors = new string[] { "Invalid Token." } };
+
+            var expiryDateUnix = long.Parse(validatedToken.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Exp).Value);
+
+            var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(expiryDateUnix);
+                //.Subtract(jwtSettings.TokenLifeTime);
+
+            if(expiryDateTimeUtc > DateTime.UtcNow)
+                return new AuthenticationResult() { Errors = new string[] { "This JWT has not expired yet." } };
+
+            var jti = validatedToken.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Jti).Value;
+
+            var storedRefreshToken = await context.RefreshTokens.SingleOrDefaultAsync(r => r.Token.ToString() == refreshToken);
+
+            if(storedRefreshToken == null)
+                return new AuthenticationResult() { Errors = new string[] { "This refresh token does not exist." } };
+
+            if(DateTime.UtcNow > storedRefreshToken.ExpiryDate)
+                return new AuthenticationResult() { Errors = new string[] { "This refresh token has expired." } };
+
+            if(storedRefreshToken.Invalidated)
+                return new AuthenticationResult() { Errors = new string[] { "This refresh token has been invalidated." } };
+
+            if (storedRefreshToken.Used)
+                return new AuthenticationResult() { Errors = new string[] { "This refresh token has been used." } };
+
+            if (storedRefreshToken.JwtId != jti)
+                return new AuthenticationResult() { Errors = new string[] { "This refresh token does not match this JWT." } };
+
+            storedRefreshToken.Used = true;
+            context.RefreshTokens.Update(storedRefreshToken);
+            await context.SaveChangesAsync();
+
+            var user = await userManager.FindByIdAsync(validatedToken.Claims.Single(c => c.Type == "id").Value);
+            return await GenerateAuthenticationResultForUserAsync(user);
+
+        }
+
+        private ClaimsPrincipal GetPrincipalFromToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                //var tokenValidationParameters = this.tokenValidationParameters.Clone();
+                //tokenValidationParameters.ValidateLifetime = false;
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+
+                if (!IsJwtWithValidSecurityAlgorithm(validatedToken))
+                    return null;
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
+        {
+            return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
+                jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private async Task<AuthenticationResult> GenerateAuthenticationResultForUserAsync(IdentityUser user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
             var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
+
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(new[] {
@@ -111,12 +191,29 @@ namespace SantapanApi.Services
                         new Claim("id", user.Id),
 
                     }),
-                Expires = DateTime.UtcNow.AddHours(2),
+                Expires = DateTime.UtcNow.Add(jwtSettings.TokenLifeTime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return new AuthenticationResult() { Success = true, Token = tokenHandler.WriteToken(token) };
+
+            var refreshToken = new RefreshToken()
+            {
+                JwtId = token.Id,
+                UserId = user.Id,
+                CreationDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddMonths(6)
+            };
+
+            await context.RefreshTokens.AddAsync(refreshToken);
+            await context.SaveChangesAsync();
+
+            return new AuthenticationResult() 
+            { 
+                Success = true, 
+                Token = tokenHandler.WriteToken(token),
+                RefreshToken = refreshToken.Token.ToString()
+            };
         }
     }
 }
