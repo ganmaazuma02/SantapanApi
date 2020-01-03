@@ -10,6 +10,6 @@ namespace SantapanApi.Services
     {
         public Task<AuthenticationResult> RegisterAsync(string email, string password);
         public Task<AuthenticationResult> LoginAsync(string email, string password);
-        public Task<GetUserResult> GetUserAsync();
+        public Task<GetUserResult> GetUserAsync(string userId);
     }
 }

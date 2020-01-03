@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
 using SantapanApi.Contracts.V1.Responses;
+using SantapanApi.Extensions;
 using SantapanApi.Services;
 
 namespace SantapanApi.V1.Controllers
@@ -79,9 +80,12 @@ namespace SantapanApi.V1.Controllers
         [HttpGet(ApiRoutes.Account.Me)]
         public async Task<ActionResult> Me()
         {
-            //var user = User.Identity.Name;
+            var result = await accountService.GetUserAsync(HttpContext.GetUserId());
 
-            return Ok(User.Identity.Name);
+            if (!result.Success)
+                return NotFound();
+
+            return Ok(result);
 
         }
     }

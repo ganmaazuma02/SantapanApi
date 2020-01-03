@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
 using SantapanApi.Domain;
@@ -27,9 +28,22 @@ namespace SantapanApi.Services
             this.jwtSettings = jwtSettings;
         }
 
-        public Task<GetUserResult> GetUserAsync()
+        public async Task<GetUserResult> GetUserAsync(string userId)
         {
-            throw new NotImplementedException();
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return new GetUserResult()
+                {
+                    Success = false
+                };
+
+            return new GetUserResult()
+            {
+                Success = true,
+                Email = user.Email,
+                UserId = user.Id
+            };
         }
 
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
