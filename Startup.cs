@@ -15,7 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using SantapanApi.Configurations;
 using SantapanApi.Models;
+using SantapanApi.Services;
 
 namespace SantapanApi
 {
@@ -31,11 +33,20 @@ namespace SantapanApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // register jwt secret as a singleton instance
             JwtSettings jwtSettings = new JwtSettings();
             Configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
 
-            services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
+            // register dependency injection services
+            services.AddScoped<IAccountService, DefaultAccountService>();
+
+            // set no automatic model validation
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
             services.Configure<ApiInfo>(Configuration.GetSection("Info"));
 
             services.AddAuthentication(options =>
@@ -88,6 +99,8 @@ namespace SantapanApi
             app.UseRouting();
 
             app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

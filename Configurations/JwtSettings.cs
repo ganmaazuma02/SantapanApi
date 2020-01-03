@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Models
+namespace SantapanApi.Configurations
 {
     public class JwtSettings
     {
