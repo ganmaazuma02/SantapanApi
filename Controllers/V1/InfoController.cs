@@ -19,8 +19,12 @@ namespace SantapanApi.V1.Controllers
             _apiInfo = apiInfoWrapper.Value;
         }
 
+        /// <summary>
+        /// Returns the API info
+        /// </summary>
+        /// <response code="200">Returns the API info</response>
         [HttpGet]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ApiInfo), 200)]
         public ActionResult<ApiInfo> GetInfo()
         {
             return _apiInfo;

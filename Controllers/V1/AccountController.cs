@@ -27,7 +27,15 @@ namespace SantapanApi.V1.Controllers
             this.cateringService = cateringService;
         }
 
+        /// <summary>
+        /// Registers a customer user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="200">Registers a customer user</response>
+        /// <response code="400">Unable to register a user due to validation error</response>
         [HttpPost(ApiRoutes.Account.RegisterCustomer)]
+        [ProducesResponseType(typeof(AuthSuccessResponse), 200)]
+        [ProducesResponseType(typeof(AuthFailedResponse), 400)]
         public async Task<ActionResult> RegisterCustomer([FromBody] UserRegistrationRequest request)
         {
             // validate response model state
@@ -64,6 +72,14 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Registers a caterer user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="200">Registers a caterer user</response>
+        /// <response code="400">Unable to register a user due to validation error</response>
+        [ProducesResponseType(typeof(AuthSuccessResponse), 200)]
+        [ProducesResponseType(typeof(AuthFailedResponse), 400)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleName.Admin)]
         [HttpPost(ApiRoutes.Account.RegisterCaterer)]
         public async Task<ActionResult> RegisterCaterer([FromBody] UserRegistrationRequest request)
@@ -102,6 +118,14 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Upgrades a customer user to a caterer and creates a catering
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="201">Upgrades a customer user to a caterer and creates a catering</response>
+        /// <response code="400">Unable to upgrade the user due to validation error</response>
+        [ProducesResponseType(typeof(UpgradeToCatererResponse), 201)]
+        [ProducesResponseType(typeof(CreateCateringFailedResponse), 400)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleName.Admin)]
         [HttpPost(ApiRoutes.Account.Upgrade)]
         public async Task<ActionResult> UpgadeToCaterer([FromBody] UpgradeToCatererRequest request)
@@ -158,6 +182,14 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Registers an admin user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="200">Registers an admin user</response>
+        /// <response code="400">Unable to register the user due to validation error</response>
+        [ProducesResponseType(typeof(AuthSuccessResponse), 200)]
+        [ProducesResponseType(typeof(AuthFailedResponse), 400)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleName.Admin)]
         [HttpPost(ApiRoutes.Account.RegisterAdmin)]
         public async Task<ActionResult> RegisterAdmin([FromBody] UserRegistrationRequest request)
@@ -196,6 +228,14 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Logs in the user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="200">Logs in the user</response>
+        /// <response code="400">Unable to log the user in due to validation error</response>
+        [ProducesResponseType(typeof(AuthSuccessResponse), 200)]
+        [ProducesResponseType(typeof(AuthFailedResponse), 400)]
         [HttpPost(ApiRoutes.Account.Login)]
         public async Task<ActionResult> Login([FromBody] UserLoginRequest request)
         {
@@ -218,6 +258,14 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Returns a refresh token for JWT
+        /// </summary>
+        /// <param name="request"></param>
+        /// <response code="200">Returns a refresh token for JWT</response>
+        /// <response code="400">Unable to retrieve the token due to validation error</response>
+        [ProducesResponseType(typeof(AuthSuccessResponse), 200)]
+        [ProducesResponseType(typeof(AuthFailedResponse), 400)]
         [HttpPost(ApiRoutes.Account.Refresh)]
         public async Task<ActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
@@ -234,6 +282,13 @@ namespace SantapanApi.V1.Controllers
 
         }
 
+        /// <summary>
+        /// Returns the currently logged in user
+        /// </summary>
+        /// <response code="200">Returns the currently logged in user</response>
+        /// <response code="404">Unable to find the user</response>
+        [ProducesResponseType(typeof(GetUserResponse), 200)]
+        [ProducesResponseType(typeof(NotFoundResult), 404)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet(ApiRoutes.Account.Me)]
         public async Task<ActionResult> Me()

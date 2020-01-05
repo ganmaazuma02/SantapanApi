@@ -20,6 +20,9 @@ using SantapanApi.Services;
 using Microsoft.OpenApi.Models;
 using SantapanApi.Data;
 using SantapanApi.Domain;
+using System.Reflection;
+using System.IO;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace SantapanApi
 {
@@ -100,6 +103,8 @@ namespace SantapanApi
             {
                 options.SwaggerDoc("v1", new OpenApiInfo() { Title = "Santapan API", Version = "v1" });
 
+                options.ExampleFilters();
+
                 var security = new Dictionary<string, IEnumerable<string>>()
                 {
                     {"Bearer", new string[0]}
@@ -124,7 +129,13 @@ namespace SantapanApi
                         },new List<string>()
                     } 
                 });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
             });
+
+            services.AddSwaggerExamplesFromAssemblyOf<Startup>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

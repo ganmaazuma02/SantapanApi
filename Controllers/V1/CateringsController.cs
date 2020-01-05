@@ -18,6 +18,7 @@ namespace SantapanApi.Controllers.V1
 {
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Produces("application/json")]
     public class CateringsController : ControllerBase
     {
         private readonly ICateringService cateringService;
@@ -31,7 +32,12 @@ namespace SantapanApi.Controllers.V1
             this.accountService = accountService;
         }
 
+        /// <summary>
+        /// Returns all caterings
+        /// </summary>
+        /// <response code="200">Returns all caterings</response>
         [HttpGet(ApiRoutes.Caterings.GetAll)]
+        [ProducesResponseType(typeof(List<CateringDto>), 200)]
         public async Task<ActionResult> GetAll()
         {
             var caterings = await cateringService.GetCateringsAsync();
@@ -52,15 +58,25 @@ namespace SantapanApi.Controllers.V1
             return Ok(cateringDtos);
         }
 
+        /// <summary>
+        /// Updates a catering
+        /// </summary>
+        /// <param name="cateringId"></param>
+        /// <param name="request"></param>
+        /// <response code="200">Updates a catering</response>
+        /// <response code="404">Catering not found</response>
         [HttpPut(ApiRoutes.Caterings.Update)]
         [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
+        [ProducesResponseType(typeof(Catering), 200)]
+        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
         public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromBody] UpdateCateringRequest request)
         {
             var catering = new Catering()
             {
                 Id = cateringId,
                 Name = request.Name,
-                Details = request.Details
+                Details = request.Details,
+                Category = request.Category
             };
 
             var updated = await cateringService.UpdateCateringAsync(catering);
@@ -74,8 +90,16 @@ namespace SantapanApi.Controllers.V1
             });
         }
 
+        /// <summary>
+        /// Deletes a catering
+        /// </summary>
+        /// <param name="cateringId"></param>
+        /// <response code="204">Deletes a catering</response>
+        /// <response code="404">Catering not found</response>
         [HttpDelete(ApiRoutes.Caterings.Delete)]
         [Authorize(Roles = RoleName.Admin)]
+        [ProducesResponseType(typeof(NoContentResult), 204)]
+        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
         public async Task<ActionResult> Delete([FromRoute] Guid cateringId)
         {
             var deleted = await cateringService.DeleteCateringAsync(cateringId);
@@ -89,7 +113,15 @@ namespace SantapanApi.Controllers.V1
             });
         }
 
+        /// <summary>
+        /// Returns a catering
+        /// </summary>
+        /// <param name="cateringId"></param>
+        /// <response code="200">Returns a catering</response>
+        /// <response code="404">Catering not found</response>
         [HttpGet(ApiRoutes.Caterings.Get)]
+        [ProducesResponseType(typeof(Catering), 200)]
+        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
         public async Task<ActionResult> Get([FromRoute] Guid cateringId)
         {
             var catering = await cateringService.GetCateringByIdAsync(cateringId);
@@ -103,8 +135,15 @@ namespace SantapanApi.Controllers.V1
             return Ok(catering);
         }
 
+        /// <summary>
+        /// Creates a catering
+        /// </summary>
+        /// <response code="201">Creates a catering</response>
+        /// <response code="400">Unable to create a catering due to validation error</response>
         [HttpPost(ApiRoutes.Caterings.Create)]
         [Authorize(Roles = RoleName.Admin)]
+        [ProducesResponseType(typeof(CreateCateringSuccessResponse), 201)]
+        [ProducesResponseType(typeof(CreateCateringFailedResponse), 400)]
         public async Task<ActionResult> Create([FromBody] CreateCateringRequest request)
         {
             var userResult = await accountService.GetCatererOrAdminUserByEmailAsync(request.Email);
@@ -137,7 +176,7 @@ namespace SantapanApi.Controllers.V1
             if (!created)
                 return BadRequest(new CreateCateringFailedResponse()
                 {
-                    Errors = new[] { "Category doesn't exist." }
+                    Errors = new[] { "Unable to create a catering." }
                 });
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
