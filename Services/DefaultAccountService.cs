@@ -17,25 +17,53 @@ namespace SantapanApi.Services
 {
     public class DefaultAccountService : IAccountService
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<SantapanUser> userManager;
+        private readonly RoleManager<SantapanRole> roleManager;
         private readonly TokenValidationParameters tokenValidationParameters;
         private readonly JwtSettings jwtSettings;
         private readonly SantapanDbContext context;
 
-        public DefaultAccountService(UserManager<IdentityUser> userManager,
+        public DefaultAccountService(UserManager<SantapanUser> userManager,
+            RoleManager<SantapanRole> roleManager,
             TokenValidationParameters tokenValidationParameters,
             JwtSettings jwtSettings,
             SantapanDbContext context)
         {
             this.userManager = userManager;
+            this.roleManager = roleManager;
             this.tokenValidationParameters = tokenValidationParameters;
             this.jwtSettings = jwtSettings;
             this.context = context;
         }
 
-        public async Task<GetUserResult> GetUserAsync(string userId)
+        public async Task<GetUserResult> GetUserByIdAsync(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return new GetUserResult()
+                {
+                    Success = false
+                };
+
+            List<Catering> userCaterings = context.Caterings.Where(c => c.UserId == user.Id).ToList();
+
+            return new GetUserResult()
+            {
+                Success = true,
+                Email = user.Email,
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Caterings = userCaterings,
+                CreatedAt = user.CreatedAt,
+                UserName = user.UserName
+            };
+        }
+
+        public async Task<GetUserResult> GetUserByEmailAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
 
             if (user == null)
                 return new GetUserResult()
@@ -47,7 +75,12 @@ namespace SantapanApi.Services
             {
                 Success = true,
                 Email = user.Email,
-                UserId = user.Id
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Caterings = user.Caterings,
+                CreatedAt = user.CreatedAt,
+                UserName = user.UserName
             };
         }
 
@@ -81,14 +114,17 @@ namespace SantapanApi.Services
             return await GenerateAuthenticationResultForUserAsync(user);
         }
 
-        public async Task<AuthenticationResult> RegisterAsync(string email, string password)
+        public async Task<AuthenticationResult> RegisterAsync(string email, string username, string password, string firstName, string lastName, string role)
         {
 
             // Register a new user
-            var user = new IdentityUser()
+            var user = new SantapanUser()
             {
-                UserName = email,
-                Email = email
+                UserName = username,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                CreatedAt = DateTime.UtcNow
             };
 
             var result = await userManager.CreateAsync(user, password);
@@ -98,7 +134,18 @@ namespace SantapanApi.Services
                 return new AuthenticationResult() { Success = false, Errors = result.Errors.Select(e => e.Description) };
             }
 
-            //await signInManager.SignInAsync(user, isPersistent: false);
+            var addRoleResult = await userManager.AddToRoleAsync(user, role);
+            if (!addRoleResult.Succeeded)
+            {
+                return new AuthenticationResult() { Success = false, Errors = addRoleResult.Errors.Select(e => e.Description) };
+            }
+
+            var updateUserResult = await userManager.UpdateAsync(user);
+            if (!updateUserResult.Succeeded)
+            {
+                return new AuthenticationResult() { Success = false, Errors = updateUserResult.Errors.Select(e => e.Description) };
+            }
+
             return await GenerateAuthenticationResultForUserAsync(user);
 
         }
@@ -176,23 +223,46 @@ namespace SantapanApi.Services
                 StringComparison.InvariantCultureIgnoreCase);
         }
 
-        private async Task<AuthenticationResult> GenerateAuthenticationResultForUserAsync(IdentityUser user)
+        private async Task<AuthenticationResult> GenerateAuthenticationResultForUserAsync(SantapanUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 
-            var tokenDescriptor = new SecurityTokenDescriptor()
+            var claims = new List<Claim>
             {
-                Subject = new ClaimsIdentity(new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                        new Claim("id", user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim("id", user.Id)
+            };
 
-                    }),
+            var userClaims = await userManager.GetClaimsAsync(user);
+            claims.AddRange(userClaims);
+
+            var userRoles = await userManager.GetRolesAsync(user);
+            foreach (var userRole in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole));
+                var role = await roleManager.FindByNameAsync(userRole);
+                if (role == null) continue;
+                var roleClaims = await roleManager.GetClaimsAsync(role);
+
+                foreach (var roleClaim in roleClaims)
+                {
+                    if (claims.Contains(roleClaim))
+                        continue;
+
+                    claims.Add(roleClaim);
+                }
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.Add(jwtSettings.TokenLifeTime),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials =
+                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

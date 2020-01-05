@@ -20,7 +20,9 @@ namespace SantapanApi.Contracts.V1
 
         public static class Account
         {
-            public const string Register = Base + "/account/register";
+            public const string RegisterCustomer = Base + "/account/register/customer";
+            public const string RegisterCaterer = Base + "/account/register/caterer";
+            public const string RegisterAdmin = Base + "/account/register/admin";
             public const string Login = Base + "/account/login";
             public const string Refresh = Base + "/account/refresh";
             public const string Me = Base + "/account/me";

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SantapanApi.Data
 {
-    public class SantapanDbContext : IdentityDbContext
+    public class SantapanDbContext : IdentityDbContext<SantapanUser, SantapanRole, string>
     {
         public SantapanDbContext(DbContextOptions<SantapanDbContext> options) : base(options)
         {

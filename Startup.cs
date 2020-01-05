@@ -19,6 +19,7 @@ using SantapanApi.Configurations;
 using SantapanApi.Services;
 using Microsoft.OpenApi.Models;
 using SantapanApi.Data;
+using SantapanApi.Domain;
 
 namespace SantapanApi
 {
@@ -79,7 +80,9 @@ namespace SantapanApi
             services.AddDbContext<SantapanDbContext>(
                 options => options.UseInMemoryDatabase("santapanapidb"));
 
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<SantapanDbContext>();
+            // Add ASP.NET Core Identity
+            AddIdentityCoreServices(services);
+            //services.AddIdentity<SantapanUser, SantapanRole>().AddEntityFrameworkStores<SantapanDbContext>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -90,6 +93,8 @@ namespace SantapanApi
             services.AddRouting(options => options.LowercaseUrls = true);
 
             services.AddControllers();
+
+            services.AddAuthorization();
 
             services.AddSwaggerGen(options =>
             {
@@ -155,6 +160,19 @@ namespace SantapanApi
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static void AddIdentityCoreServices(IServiceCollection services)
+        {
+            var builder = services.AddIdentityCore<SantapanUser>();
+            builder = new IdentityBuilder(
+                builder.UserType,
+                typeof(SantapanRole),
+                builder.Services);
+
+            builder.AddRoles<SantapanRole>()
+                .AddEntityFrameworkStores<SantapanDbContext>()
+                .AddDefaultTokenProviders();
         }
     }
 }

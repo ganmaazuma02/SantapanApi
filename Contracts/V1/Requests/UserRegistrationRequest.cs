@@ -9,12 +9,22 @@ namespace SantapanApi.Contracts.V1.Requests
     public class UserRegistrationRequest
     {
         [EmailAddress]
+        [Required]
         public string Email { get; set; }
 
-        public string Name { get; set; }
+        [Required]
+        public string FirstName { get; set; }
 
+        [Required]
+        public string LastName { get; set; }
+
+        [Required]
+        public string UserName { get; set; }
+
+        [Required]
         public string Password { get; set; }
 
+        [Required]
         public string ConfirmPassword { get; set; }
     }
 }

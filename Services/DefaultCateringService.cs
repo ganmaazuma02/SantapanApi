@@ -43,7 +43,7 @@ namespace SantapanApi.Services
 
         public async Task<List<Catering>> GetCateringsAsync()
         {
-            return await context.Caterings.ToListAsync();
+            return await context.Caterings.Include(c => c.User).ToListAsync();
         }
 
         public async Task<bool> UpdateCateringAsync(Catering cateringToUpdate)

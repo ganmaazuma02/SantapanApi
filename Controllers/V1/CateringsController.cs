@@ -10,6 +10,7 @@ using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
 using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
+using SantapanApi.Dtos;
 using SantapanApi.Services;
 
 namespace SantapanApi.Controllers.V1
@@ -19,19 +20,37 @@ namespace SantapanApi.Controllers.V1
     public class CateringsController : ControllerBase
     {
         private readonly ICateringService cateringService;
+        private readonly IAccountService accountService;
 
-        public CateringsController(ICateringService cateringService)
+        public CateringsController(ICateringService cateringService, IAccountService accountService)
         {
             this.cateringService = cateringService;
+            this.accountService = accountService;
         }
 
         [HttpGet(ApiRoutes.Caterings.GetAll)]
         public async Task<ActionResult> GetAll()
         {
-            return Ok(await cateringService.GetCateringsAsync());
+            var caterings = await cateringService.GetCateringsAsync();
+            List<CateringDto> cateringDtos = new List<CateringDto>();
+
+            foreach(Catering catering in caterings)
+            {
+                cateringDtos.Add(new CateringDto
+                {
+                    Id = catering.Id,
+                    Category = catering.Category,
+                    Details = catering.Details,
+                    Name = catering.Name,
+                    UserId = catering.UserId
+                });
+            }
+
+            return Ok(cateringDtos);
         }
 
         [HttpPut(ApiRoutes.Caterings.Update)]
+        [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
         public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromBody] UpdateCateringRequest request)
         {
             var catering = new Catering()
@@ -46,10 +65,14 @@ namespace SantapanApi.Controllers.V1
             if (updated)
                 return Ok(catering);
 
-            return NotFound();
+            return NotFound(new ResourceNotFoundResponse()
+            {
+                Errors = new[] { "Catering not found." }
+            });
         }
 
         [HttpDelete(ApiRoutes.Caterings.Delete)]
+        [Authorize(Roles = RoleName.Admin)]
         public async Task<ActionResult> Delete([FromRoute] Guid cateringId)
         {
             var deleted = await cateringService.DeleteCateringAsync(cateringId);
@@ -57,7 +80,10 @@ namespace SantapanApi.Controllers.V1
             if (deleted)
                 return NoContent();
 
-            return NotFound();
+            return NotFound(new ResourceNotFoundResponse()
+            {
+                Errors = new[] { "Catering not found." }
+            });
         }
 
         [HttpGet(ApiRoutes.Caterings.Get)]
@@ -66,20 +92,50 @@ namespace SantapanApi.Controllers.V1
             var catering = await cateringService.GetCateringByIdAsync(cateringId);
 
             if (catering == null)
-                return NotFound();
+                return NotFound(new ResourceNotFoundResponse()
+                {
+                    Errors = new[] { "Catering not found." }
+                });
 
             return Ok(catering);
         }
 
         [HttpPost(ApiRoutes.Caterings.Create)]
+        [Authorize(Roles = RoleName.Admin)]
         public async Task<ActionResult> Create([FromBody] CreateCateringRequest request)
         {
-            var catering = new Catering() { Name = request.Name, Details = request.Details };
+            var userResult = await accountService.GetUserByEmailAsync(request.Email);
+
+            if (!userResult.Success)
+                return NotFound(new ResourceNotFoundResponse()
+                {
+                    Errors = new[] { "User not found." }
+                });
+
+            if (request.Category != Categories.Dessert
+                && request.Category != Categories.MainCourse
+                && request.Category != Categories.Side)
+                return BadRequest(new CreateCateringFailedResponse()
+                {
+                    Errors = new[] { "Category doesn't exist." }
+                });
+
+
+            var catering = new Catering() 
+            { 
+                Name = request.Name, 
+                Details = request.Details,
+                Category = request.Category,
+                UserId = userResult.UserId
+            };
 
             var created = await cateringService.CreateCateringAsync(catering);
 
             if (!created)
-                return BadRequest();
+                return BadRequest(new CreateCateringFailedResponse()
+                {
+                    Errors = new[] { "Category doesn't exist." }
+                });
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var locationUrl = baseUrl + "/" + ApiRoutes.Caterings.Get.Replace("{cateringId}", catering.Id.ToString());

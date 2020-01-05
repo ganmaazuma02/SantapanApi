@@ -8,9 +8,10 @@ namespace SantapanApi.Services
 {
     public interface IAccountService
     {
-        Task<AuthenticationResult> RegisterAsync(string email, string password);
+        Task<AuthenticationResult> RegisterAsync(string email, string userName, string password, string firstName, string lastName, string role);
         Task<AuthenticationResult> LoginAsync(string email, string password);
-        Task<GetUserResult> GetUserAsync(string userId);
+        Task<GetUserResult> GetUserByIdAsync(string userId);
+        Task<GetUserResult> GetUserByEmailAsync(string email);
         Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken);
     }
 }
