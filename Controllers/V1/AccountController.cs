@@ -19,10 +19,12 @@ namespace SantapanApi.V1.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService accountService;
+        private readonly ICateringService cateringService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ICateringService cateringService)
         {
             this.accountService = accountService;
+            this.cateringService = cateringService;
         }
 
         [HttpPost(ApiRoutes.Account.RegisterCustomer)]
@@ -96,6 +98,62 @@ namespace SantapanApi.V1.Controllers
             {
                 Errors = authResponse.Errors
             });
+
+
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleName.Admin)]
+        [HttpPost(ApiRoutes.Account.Upgrade)]
+        public async Task<ActionResult> UpgadeToCaterer([FromBody] UpgradeToCatererRequest request)
+        {
+            // validate response model state
+            if (!ModelState.IsValid)
+                return BadRequest(new CreateCateringFailedResponse()
+                {
+                    Errors = ModelState.Values.SelectMany(m => m.Errors.Select(e => e.ErrorMessage))
+                });
+
+
+            if (request.CateringCategory != Categories.Dessert
+                && request.CateringCategory != Categories.MainCourse
+                && request.CateringCategory != Categories.Side)
+                return BadRequest(new CreateCateringFailedResponse()
+                {
+                    Errors = new[] { "Category doesn't exist." }
+                });
+
+            var upgradeResult = await accountService.UpgradeCustomerToCatererAsync(request.Email);
+
+            if (!upgradeResult.Success)
+                return NotFound(new ResourceNotFoundResponse()
+                {
+                    Errors = upgradeResult.Errors
+                });
+
+
+            var catering = new Catering()
+            {
+                Name = request.CateringName,
+                Details = request.CateringDetails,
+                Category = request.CateringCategory,
+                UserId = upgradeResult.UserId
+            };
+
+            var created = await cateringService.CreateCateringAsync(catering);
+
+            if (!created)
+                return BadRequest(new CreateCateringFailedResponse()
+                {
+                    // TODO: change the error
+                    Errors = new[] { "Catering cannot be created. Check the input." }
+                });
+
+            var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+            var locationUrl = baseUrl + "/" + ApiRoutes.Caterings.Get.Replace("{cateringId}", catering.Id.ToString());
+
+            var response = new UpgradeToCatererResponse() { CateringId = catering.Id, UserId = upgradeResult.UserId};
+
+            return Created(locationUrl, response);
 
 
         }

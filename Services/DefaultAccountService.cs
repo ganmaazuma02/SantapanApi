@@ -61,14 +61,22 @@ namespace SantapanApi.Services
             };
         }
 
-        public async Task<GetUserResult> GetUserByEmailAsync(string email)
+        public async Task<GetUserResult> GetCatererOrAdminUserByEmailAsync(string email)
         {
             var user = await userManager.FindByEmailAsync(email);
 
             if (user == null)
                 return new GetUserResult()
                 {
-                    Success = false
+                    Success = false,
+                    Errors = new [] {"User does not exist."}
+                };
+
+            if(!await userManager.IsInRoleAsync(user, RoleName.Caterer) && !await userManager.IsInRoleAsync(user, RoleName.Admin))
+                return new GetUserResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User is not an admin nor a caterer." }
                 };
 
             return new GetUserResult()
@@ -149,7 +157,6 @@ namespace SantapanApi.Services
             return await GenerateAuthenticationResultForUserAsync(user);
 
         }
-
 
         public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
         {
@@ -283,6 +290,42 @@ namespace SantapanApi.Services
                 Success = true, 
                 Token = tokenHandler.WriteToken(token),
                 RefreshToken = refreshToken.Token.ToString()
+            };
+        }
+
+        public async Task<UpgradeToCatererResult> UpgradeCustomerToCatererAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return new UpgradeToCatererResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User does not exist." }
+                };
+
+            if (await userManager.IsInRoleAsync(user, RoleName.Admin))
+                return new UpgradeToCatererResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User is an admin. No need for upgrading." }
+                };
+
+            if (await userManager.IsInRoleAsync(user, RoleName.Caterer))
+                return new UpgradeToCatererResult()
+                {
+                    Success = false,
+                    Errors = new[] { "User is a caterer. No need for upgrading." }
+                };
+
+            await userManager.AddToRoleAsync(user, RoleName.Caterer);
+            await userManager.RemoveFromRoleAsync(user, RoleName.Customer);
+            await userManager.UpdateAsync(user);
+
+            return new UpgradeToCatererResult()
+            {
+                Success = true,
+                UserId = user.Id
             };
         }
     }

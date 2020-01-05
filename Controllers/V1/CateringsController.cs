@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
@@ -22,7 +23,9 @@ namespace SantapanApi.Controllers.V1
         private readonly ICateringService cateringService;
         private readonly IAccountService accountService;
 
-        public CateringsController(ICateringService cateringService, IAccountService accountService)
+        public CateringsController(
+            ICateringService cateringService, 
+            IAccountService accountService)
         {
             this.cateringService = cateringService;
             this.accountService = accountService;
@@ -104,12 +107,12 @@ namespace SantapanApi.Controllers.V1
         [Authorize(Roles = RoleName.Admin)]
         public async Task<ActionResult> Create([FromBody] CreateCateringRequest request)
         {
-            var userResult = await accountService.GetUserByEmailAsync(request.Email);
+            var userResult = await accountService.GetCatererOrAdminUserByEmailAsync(request.Email);
 
             if (!userResult.Success)
                 return NotFound(new ResourceNotFoundResponse()
                 {
-                    Errors = new[] { "User not found." }
+                    Errors = userResult.Errors
                 });
 
             if (request.Category != Categories.Dessert

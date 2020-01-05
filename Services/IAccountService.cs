@@ -10,8 +10,9 @@ namespace SantapanApi.Services
     {
         Task<AuthenticationResult> RegisterAsync(string email, string userName, string password, string firstName, string lastName, string role);
         Task<AuthenticationResult> LoginAsync(string email, string password);
+        Task<UpgradeToCatererResult> UpgradeCustomerToCatererAsync(string email);
         Task<GetUserResult> GetUserByIdAsync(string userId);
-        Task<GetUserResult> GetUserByEmailAsync(string email);
+        Task<GetUserResult> GetCatererOrAdminUserByEmailAsync(string email);
         Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken);
     }
 }
