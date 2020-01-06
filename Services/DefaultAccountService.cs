@@ -36,62 +36,6 @@ namespace SantapanApi.Services
             this.context = context;
         }
 
-        public async Task<GetUserResult> GetUserByIdAsync(string userId)
-        {
-            var user = await userManager.FindByIdAsync(userId);
-
-            if (user == null)
-                return new GetUserResult()
-                {
-                    Success = false
-                };
-
-            List<Catering> userCaterings = context.Caterings.Where(c => c.UserId == user.Id).ToList();
-
-            return new GetUserResult()
-            {
-                Success = true,
-                Email = user.Email,
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Caterings = userCaterings,
-                CreatedAt = user.CreatedAt,
-                UserName = user.UserName
-            };
-        }
-
-        public async Task<GetUserResult> GetCatererOrAdminUserByEmailAsync(string email)
-        {
-            var user = await userManager.FindByEmailAsync(email);
-
-            if (user == null)
-                return new GetUserResult()
-                {
-                    Success = false,
-                    Errors = new [] {"User does not exist."}
-                };
-
-            if(!await userManager.IsInRoleAsync(user, RoleName.Caterer) && !await userManager.IsInRoleAsync(user, RoleName.Admin))
-                return new GetUserResult()
-                {
-                    Success = false,
-                    Errors = new[] { "User is not an admin nor a caterer." }
-                };
-
-            return new GetUserResult()
-            {
-                Success = true,
-                Email = user.Email,
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Caterings = user.Caterings,
-                CreatedAt = user.CreatedAt,
-                UserName = user.UserName
-            };
-        }
-
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
         {
             var user = await userManager.FindByEmailAsync(email);

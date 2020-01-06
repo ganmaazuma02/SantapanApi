@@ -23,6 +23,7 @@ using SantapanApi.Domain;
 using System.Reflection;
 using System.IO;
 using Swashbuckle.AspNetCore.Filters;
+using Sieve.Services;
 
 namespace SantapanApi
 {
@@ -46,6 +47,8 @@ namespace SantapanApi
             // register dependency injection services
             services.AddScoped<IAccountService, DefaultAccountService>();
             services.AddScoped<ICateringService, DefaultCateringService>();
+            services.AddScoped<IUserService, DefaultUserService>();
+            services.AddScoped<SieveProcessor>();
 
             // set no automatic model validation
             services.Configure<ApiBehaviorOptions>(options =>

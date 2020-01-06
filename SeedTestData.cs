@@ -37,7 +37,30 @@ namespace SantapanApi
                 Name = "Suria Aiskrim",
                 Category = Categories.Dessert,
                 Details = "Aiskrim pelbagai perisa! Lick it, love it!",
-                UserId = testCateringUser.Id
+                UserId = testCateringUser.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            var testCateringUser2 = await userManager.FindByNameAsync("caterer2");
+
+            await context.Caterings.AddAsync(new Catering()
+            {
+                Name = "Nasi Tomato Pak Chaq",
+                Category = Categories.MainCourse,
+                Details = "Nasi tomato dengan ayam masak merah.",
+                UserId = testCateringUser2.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            var testCateringUser3 = await userManager.FindByNameAsync("caterer3");
+
+            await context.Caterings.AddAsync(new Catering()
+            {
+                Name = "Kambing Bakar Mak Minah",
+                Category = Categories.Side,
+                Details = "Stesen kambing bakar",
+                UserId = testCateringUser3.Id,
+                CreatedAt = DateTime.UtcNow
             });
 
             await context.SaveChangesAsync();
@@ -82,6 +105,32 @@ namespace SantapanApi
             await userManager.CreateAsync(catererUser, "@Abc123");
             await userManager.AddToRoleAsync(catererUser, RoleName.Caterer);
             await userManager.UpdateAsync(catererUser);
+
+            var catererUser2 = new SantapanUser
+            {
+                Email = "caterer2@santapan.my",
+                UserName = "caterer2",
+                FirstName = "Caterer2",
+                LastName = "User",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await userManager.CreateAsync(catererUser2, "@Abc123");
+            await userManager.AddToRoleAsync(catererUser2, RoleName.Caterer);
+            await userManager.UpdateAsync(catererUser2);
+
+            var catererUser3 = new SantapanUser
+            {
+                Email = "caterer3@santapan.my",
+                UserName = "caterer3",
+                FirstName = "Caterer3",
+                LastName = "User",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await userManager.CreateAsync(catererUser3, "@Abc123");
+            await userManager.AddToRoleAsync(catererUser3, RoleName.Caterer);
+            await userManager.UpdateAsync(catererUser3);
 
             var customerUser = new SantapanUser
             {

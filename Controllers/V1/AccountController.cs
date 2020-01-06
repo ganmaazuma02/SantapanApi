@@ -16,15 +16,21 @@ using SantapanApi.Services;
 namespace SantapanApi.V1.Controllers
 {
     [ApiController]
+    [Produces("application/json")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService accountService;
         private readonly ICateringService cateringService;
+        private readonly IUserService userService;
 
-        public AccountController(IAccountService accountService, ICateringService cateringService)
+        public AccountController(
+            IAccountService accountService, 
+            ICateringService cateringService,
+            IUserService userService)
         {
             this.accountService = accountService;
             this.cateringService = cateringService;
+            this.userService = userService;
         }
 
         /// <summary>
@@ -293,7 +299,7 @@ namespace SantapanApi.V1.Controllers
         [HttpGet(ApiRoutes.Account.Me)]
         public async Task<ActionResult> Me()
         {
-            var result = await accountService.GetUserByIdAsync(HttpContext.GetUserId());
+            var result = await userService.GetUserByIdAsync(HttpContext.GetUserId());
 
             if (!result.Success)
                 return NotFound();

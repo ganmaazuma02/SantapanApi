@@ -8,7 +8,7 @@ namespace SantapanApi.Services
 {
     public interface ICateringService
     {
-        Task<List<Catering>> GetCateringsAsync();
+        IQueryable<Catering> GetCateringsQuery();
         Task<Catering> GetCateringByIdAsync(Guid cateringId);
         Task<bool> CreateCateringAsync(Catering catering);
         Task<bool> UpdateCateringAsync(Catering cateringToUpdate);

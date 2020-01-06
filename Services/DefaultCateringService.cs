@@ -41,9 +41,9 @@ namespace SantapanApi.Services
             return await context.Caterings.SingleOrDefaultAsync(c => c.Id == cateringId);
         }
 
-        public async Task<List<Catering>> GetCateringsAsync()
+        public IQueryable<Catering> GetCateringsQuery()
         {
-            return await context.Caterings.Include(c => c.User).ToListAsync();
+            return context.Caterings.AsNoTracking();
         }
 
         public async Task<bool> UpdateCateringAsync(Catering cateringToUpdate)

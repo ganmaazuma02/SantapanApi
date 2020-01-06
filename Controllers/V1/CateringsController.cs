@@ -13,6 +13,8 @@ using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
 using SantapanApi.Dtos;
 using SantapanApi.Services;
+using Sieve.Models;
+using Sieve.Services;
 
 namespace SantapanApi.Controllers.V1
 {
@@ -23,13 +25,19 @@ namespace SantapanApi.Controllers.V1
     {
         private readonly ICateringService cateringService;
         private readonly IAccountService accountService;
+        private readonly IUserService userService;
+        private readonly SieveProcessor sieveProcessor;
 
         public CateringsController(
             ICateringService cateringService, 
-            IAccountService accountService)
+            IAccountService accountService,
+            IUserService userService,
+            SieveProcessor sieveProcessor)
         {
             this.cateringService = cateringService;
             this.accountService = accountService;
+            this.userService = userService;
+            this.sieveProcessor = sieveProcessor;
         }
 
         /// <summary>
@@ -38,12 +46,14 @@ namespace SantapanApi.Controllers.V1
         /// <response code="200">Returns all caterings</response>
         [HttpGet(ApiRoutes.Caterings.GetAll)]
         [ProducesResponseType(typeof(List<CateringDto>), 200)]
-        public async Task<ActionResult> GetAll()
+        public ActionResult GetAll([FromQuery]SieveModel sieveModel)
         {
-            var caterings = await cateringService.GetCateringsAsync();
+            var cateringsQuery = cateringService.GetCateringsQuery();
+            var caterings = sieveProcessor.Apply(sieveModel, cateringsQuery).ToList();
+
             List<CateringDto> cateringDtos = new List<CateringDto>();
 
-            foreach(Catering catering in caterings)
+            foreach (Catering catering in caterings)
             {
                 cateringDtos.Add(new CateringDto
                 {
@@ -51,11 +61,13 @@ namespace SantapanApi.Controllers.V1
                     Category = catering.Category,
                     Details = catering.Details,
                     Name = catering.Name,
-                    UserId = catering.UserId
+                    UserId = catering.UserId,
+                    CreatedAt = catering.CreatedAt
                 });
             }
 
             return Ok(cateringDtos);
+
         }
 
         /// <summary>
@@ -146,7 +158,7 @@ namespace SantapanApi.Controllers.V1
         [ProducesResponseType(typeof(CreateCateringFailedResponse), 400)]
         public async Task<ActionResult> Create([FromBody] CreateCateringRequest request)
         {
-            var userResult = await accountService.GetCatererOrAdminUserByEmailAsync(request.Email);
+            var userResult = await userService.GetCatererOrAdminUserByEmailAsync(request.Email);
 
             if (!userResult.Success)
                 return NotFound(new ResourceNotFoundResponse()
