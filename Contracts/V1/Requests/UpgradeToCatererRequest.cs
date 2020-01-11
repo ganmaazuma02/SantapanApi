@@ -13,7 +13,7 @@ namespace SantapanApi.Contracts.V1.Requests
         [Required]
         public string CateringDetails { get; set; }
         [Required]
-        public string CateringCategory { get; set; }
+        public string[] CateringCategories { get; set; }
         [Required]
         public string Email { get; set; }
     }

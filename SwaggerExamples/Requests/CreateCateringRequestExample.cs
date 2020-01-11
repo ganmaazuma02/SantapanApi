@@ -1,4 +1,5 @@
 ﻿using SantapanApi.Contracts.V1.Requests;
+using SantapanApi.Domain.Constants;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace SantapanApi.SwaggerExamples.Requests
@@ -11,7 +12,7 @@ namespace SantapanApi.SwaggerExamples.Requests
             {
                 Email = "caterer@santapan.my",
                 Name = "Kambing Golek Mak Minah",
-                Category = "side",
+                CateringCategories = new string[] { Categories.Station, Categories.Wedding},
                 Details = "Stesen kambing golek bakar"
             };
         }

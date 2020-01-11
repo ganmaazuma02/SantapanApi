@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using SantapanApi.Data;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +36,11 @@ namespace SantapanApi.Services
                     Success = false
                 };
 
-            List<Catering> userCaterings = context.Caterings.Where(c => c.UserId == user.Id).ToList();
+            List<Catering> userCaterings = context.Caterings
+                .Include(c => c.CateringCategories)
+                .ThenInclude(c => c.Category)
+                .Where(c => c.UserId == user.Id)
+                .ToList();
 
             return new GetUserResult()
             {

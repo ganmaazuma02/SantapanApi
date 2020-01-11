@@ -1,4 +1,5 @@
 ﻿using SantapanApi.Domain;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

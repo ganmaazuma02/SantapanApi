@@ -11,6 +11,8 @@ using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
 using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using SantapanApi.Dtos;
 using SantapanApi.Services;
 using Sieve.Models;
@@ -58,7 +60,7 @@ namespace SantapanApi.Controllers.V1
                 cateringDtos.Add(new CateringDto
                 {
                     Id = catering.Id,
-                    Category = catering.Category,
+                    Categories = catering.CateringCategories.Select(c => c.Category.Name).ToList(),
                     Details = catering.Details,
                     Name = catering.Name,
                     UserId = catering.UserId,
@@ -87,8 +89,7 @@ namespace SantapanApi.Controllers.V1
             {
                 Id = cateringId,
                 Name = request.Name,
-                Details = request.Details,
-                Category = request.Category
+                Details = request.Details
             };
 
             var updated = await cateringService.UpdateCateringAsync(catering);
@@ -166,24 +167,24 @@ namespace SantapanApi.Controllers.V1
                     Errors = userResult.Errors
                 });
 
-            if (request.Category != Categories.Dessert
-                && request.Category != Categories.MainCourse
-                && request.Category != Categories.Side)
-                return BadRequest(new CreateCateringFailedResponse()
-                {
-                    Errors = new[] { "Category doesn't exist." }
-                });
 
+            foreach (string category in request.CateringCategories)
+            {
+                if (Categories.CategoriesList.Find(c => c == category) == null)
+                    return BadRequest(new CreateCateringFailedResponse()
+                    {
+                        Errors = new[] { "Category doesn't exist." }
+                    });
+            }
 
             var catering = new Catering() 
             { 
                 Name = request.Name, 
                 Details = request.Details,
-                Category = request.Category,
                 UserId = userResult.UserId
             };
 
-            var created = await cateringService.CreateCateringAsync(catering);
+            var created = await cateringService.CreateCateringAsync(catering, request.CateringCategories);
 
             if (!created)
                 return BadRequest(new CreateCateringFailedResponse()

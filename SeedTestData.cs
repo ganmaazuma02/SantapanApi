@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using SantapanApi.Data;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +20,38 @@ namespace SantapanApi
                 services.GetRequiredService<RoleManager<SantapanRole>>(),
                 services.GetRequiredService<UserManager<SantapanUser>>());
 
+            await AddTestCategories(
+                services.GetRequiredService<SantapanDbContext>());
+
             await AddTestData(
                 services.GetRequiredService<SantapanDbContext>(),
                 services.GetRequiredService<UserManager<SantapanUser>>());
+
+        }
+
+        public static async Task AddTestCategories(
+            SantapanDbContext context)
+        {
+            if (context.Categories.Any())
+                return;
+
+            Category dessertCategory = new Category { Name = Categories.Dessert };
+            Category buffetCategory = new Category { Name = Categories.Buffet };
+            Category hiteaCategory = new Category { Name = Categories.HiTea };
+            Category officeCategory = new Category { Name = Categories.Office };
+            Category stationCategory = new Category { Name = Categories.Station };
+            Category weddingCategory = new Category { Name = Categories.Wedding };
+            Category birthdayCategory = new Category { Name = Categories.Birthday };
+
+            await context.Categories.AddAsync(dessertCategory);
+            await context.Categories.AddAsync(birthdayCategory);
+            await context.Categories.AddAsync(buffetCategory);
+            await context.Categories.AddAsync(hiteaCategory);
+            await context.Categories.AddAsync(officeCategory);
+            await context.Categories.AddAsync(stationCategory);
+            await context.Categories.AddAsync(weddingCategory);
+
+            await context.SaveChangesAsync();
         }
 
         public static async Task AddTestData(
@@ -30,38 +61,59 @@ namespace SantapanApi
             if (context.Caterings.Any())
                 return;
 
+
+
             var testCateringUser = await userManager.FindByNameAsync("caterer");
 
-            await context.Caterings.AddAsync(new Catering()
+            var suriaAiskrimCatering = new Catering
             {
                 Name = "Suria Aiskrim",
-                Category = Categories.Dessert,
                 Details = "Aiskrim pelbagai perisa! Lick it, love it!",
                 UserId = testCateringUser.Id,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            suriaAiskrimCatering.CateringCategories = new List<CateringCategory> 
+            { 
+                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Dessert), Catering = suriaAiskrimCatering },
+                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Station), Catering = suriaAiskrimCatering }
+            };
+            
+            await context.Caterings.AddAsync(suriaAiskrimCatering);
 
             var testCateringUser2 = await userManager.FindByNameAsync("caterer2");
 
-            await context.Caterings.AddAsync(new Catering()
+            var nasiTomatoCatering = new Catering
             {
                 Name = "Nasi Tomato Pak Chaq",
-                Category = Categories.MainCourse,
                 Details = "Nasi tomato dengan ayam masak merah.",
                 UserId = testCateringUser2.Id,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            nasiTomatoCatering.CateringCategories = new List<CateringCategory>
+            {
+                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Wedding), Catering = nasiTomatoCatering}
+            };
+
+            await context.Caterings.AddAsync(nasiTomatoCatering);
 
             var testCateringUser3 = await userManager.FindByNameAsync("caterer3");
 
-            await context.Caterings.AddAsync(new Catering()
+            var kambingBakarCatering = new Catering()
             {
                 Name = "Kambing Bakar Mak Minah",
-                Category = Categories.Side,
                 Details = "Stesen kambing bakar",
                 UserId = testCateringUser3.Id,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            kambingBakarCatering.CateringCategories = new List<CateringCategory>
+            {
+                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Wedding), Catering = kambingBakarCatering}
+            };
+
+            await context.Caterings.AddAsync(kambingBakarCatering);
 
             await context.SaveChangesAsync();
         }

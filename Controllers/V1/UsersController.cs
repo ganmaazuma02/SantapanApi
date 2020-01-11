@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
 using SantapanApi.Dtos;
 using SantapanApi.Services;
 using Sieve.Models;

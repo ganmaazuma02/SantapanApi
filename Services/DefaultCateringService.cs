@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SantapanApi.Data;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +19,21 @@ namespace SantapanApi.Services
             this.context = context;
         }
 
-        public async Task<bool> CreateCateringAsync(Catering catering)
+        public async Task<bool> CreateCateringAsync(Catering catering, string[] cateringCategories)
         {
+            List<CateringCategory> cateringCategoriesForDb = new List<CateringCategory>();
+
+            foreach (string cateringCategory in cateringCategories)
+            {
+                var category = context.Categories.Single(c => c.Name == cateringCategory);
+                if (category == null)
+                    return false;
+
+                cateringCategoriesForDb.Add(new CateringCategory { Category = context.Categories.Single(c => c.Name == cateringCategory), Catering = catering });
+            }
+
+            catering.CateringCategories = cateringCategoriesForDb;
+
             await context.Caterings.AddAsync(catering);
             var created = await context.SaveChangesAsync();
             return created > 0;
@@ -43,7 +58,7 @@ namespace SantapanApi.Services
 
         public IQueryable<Catering> GetCateringsQuery()
         {
-            return context.Caterings.AsNoTracking();
+            return context.Caterings.Include(c => c.CateringCategories).ThenInclude(c => c.Category).AsNoTracking();
         }
 
         public async Task<bool> UpdateCateringAsync(Catering cateringToUpdate)

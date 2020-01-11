@@ -1,4 +1,5 @@
 ﻿using SantapanApi.Domain;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace SantapanApi.Services
     {
         IQueryable<Catering> GetCateringsQuery();
         Task<Catering> GetCateringByIdAsync(Guid cateringId);
-        Task<bool> CreateCateringAsync(Catering catering);
+        Task<bool> CreateCateringAsync(Catering catering, string[] cateringCategories);
         Task<bool> UpdateCateringAsync(Catering cateringToUpdate);
         Task<bool> DeleteCateringAsync(Guid cateringId);
     }

@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using SantapanApi.Configurations;
 using SantapanApi.Data;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;

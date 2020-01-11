@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Domain
+namespace SantapanApi.Domain.Entities
 {
     public class SantapanUser : IdentityUser
     {

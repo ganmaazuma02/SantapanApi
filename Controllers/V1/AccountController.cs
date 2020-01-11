@@ -9,6 +9,8 @@ using SantapanApi.Contracts.V1;
 using SantapanApi.Contracts.V1.Requests;
 using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
+using SantapanApi.Domain.Constants;
+using SantapanApi.Domain.Entities;
 using SantapanApi.Dtos;
 using SantapanApi.Extensions;
 using SantapanApi.Services;
@@ -143,14 +145,14 @@ namespace SantapanApi.V1.Controllers
                     Errors = ModelState.Values.SelectMany(m => m.Errors.Select(e => e.ErrorMessage))
                 });
 
-
-            if (request.CateringCategory != Categories.Dessert
-                && request.CateringCategory != Categories.MainCourse
-                && request.CateringCategory != Categories.Side)
-                return BadRequest(new CreateCateringFailedResponse()
-                {
-                    Errors = new[] { "Category doesn't exist." }
-                });
+            foreach(string category in request.CateringCategories)
+            {
+                if (Categories.CategoriesList.Find(c => c == category) == null)
+                    return BadRequest(new CreateCateringFailedResponse()
+                    {
+                        Errors = new[] { "Category doesn't exist." }
+                    });
+            } 
 
             var upgradeResult = await accountService.UpgradeCustomerToCatererAsync(request.Email);
 
@@ -160,22 +162,19 @@ namespace SantapanApi.V1.Controllers
                     Errors = upgradeResult.Errors
                 });
 
-
             var catering = new Catering()
             {
                 Name = request.CateringName,
                 Details = request.CateringDetails,
-                Category = request.CateringCategory,
                 UserId = upgradeResult.UserId
             };
 
-            var created = await cateringService.CreateCateringAsync(catering);
+            var created = await cateringService.CreateCateringAsync(catering, request.CateringCategories);
 
             if (!created)
                 return BadRequest(new CreateCateringFailedResponse()
                 {
-                    // TODO: change the error
-                    Errors = new[] { "Catering cannot be created. Check the input." }
+                    Errors = new[] { "Unable to create a catering." }
                 });
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
@@ -310,7 +309,7 @@ namespace SantapanApi.V1.Controllers
             {
                 cateringDtos.Add(new CateringDto
                 {
-                    Category = catering.Category,
+                    Categories = catering.CateringCategories.Select(c => c.Category.Name).ToList(),
                     Details = catering.Details,
                     Id = catering.Id,
                     Name = catering.Name,

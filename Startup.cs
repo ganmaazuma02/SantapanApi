@@ -24,6 +24,7 @@ using System.Reflection;
 using System.IO;
 using Swashbuckle.AspNetCore.Filters;
 using Sieve.Services;
+using SantapanApi.Domain.Entities;
 
 namespace SantapanApi
 {

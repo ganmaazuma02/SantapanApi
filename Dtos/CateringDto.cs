@@ -10,7 +10,7 @@ namespace SantapanApi.Dtos
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }
-        public string Category { get; set; }
+        public List<string> Categories { get; set; }
         public string UserId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
