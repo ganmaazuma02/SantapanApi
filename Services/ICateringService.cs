@@ -12,7 +12,7 @@ namespace SantapanApi.Services
         IQueryable<Catering> GetCateringsQuery();
         Task<Catering> GetCateringByIdAsync(Guid cateringId);
         Task<bool> CreateCateringAsync(Catering catering, string[] cateringCategories);
-        Task<bool> UpdateCateringAsync(Catering cateringToUpdate);
+        Task<bool> UpdateCateringAsync(Catering cateringToUpdate, string[] cateringCategories);
         Task<bool> DeleteCateringAsync(Guid cateringId);
     }
 }

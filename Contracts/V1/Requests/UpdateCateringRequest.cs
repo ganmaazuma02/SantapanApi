@@ -10,6 +10,6 @@ namespace SantapanApi.Contracts.V1.Requests
         public string Name { get; set; }
         public string Details { get; set; }
 
-        //public string[] CateringCategories { get; set; }
+        public string[] CateringCategories { get; set; }
     }
 }

@@ -37,6 +37,7 @@ namespace SantapanApi.Controllers.V1
         /// </summary>
         /// <response code="200">Returns all users</response>
         [HttpGet(ApiRoutes.Users.GetAll)]
+        [ProducesResponseType(typeof(List<SantapanUserDto>), 200)]
         public async Task<ActionResult> GetAll([FromQuery] SieveModel sieveModel)
         {
             var usersQuery = userService.GetUsersQuery();
