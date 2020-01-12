@@ -13,7 +13,6 @@ using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
 using SantapanApi.Domain.Constants;
 using SantapanApi.Domain.Entities;
-using SantapanApi.Dtos;
 using SantapanApi.Services;
 using Sieve.Models;
 using Sieve.Services;
@@ -47,17 +46,17 @@ namespace SantapanApi.Controllers.V1
         /// </summary>
         /// <response code="200">Returns all caterings</response>
         [HttpGet(ApiRoutes.Caterings.GetAll)]
-        [ProducesResponseType(typeof(List<CateringDto>), 200)]
+        [ProducesResponseType(typeof(List<CateringResponse>), 200)]
         public ActionResult GetAll([FromQuery]SieveModel sieveModel)
         {
             var cateringsQuery = cateringService.GetCateringsQuery();
             var caterings = sieveProcessor.Apply(sieveModel, cateringsQuery).ToList();
 
-            List<CateringDto> cateringDtos = new List<CateringDto>();
+            List<CateringResponse> cateringDtos = new List<CateringResponse>();
 
             foreach (Catering catering in caterings)
             {
-                cateringDtos.Add(new CateringDto
+                cateringDtos.Add(new CateringResponse
                 {
                     Id = catering.Id,
                     Categories = catering.CateringCategories.Select(c => c.Category.Name).ToList(),
@@ -81,7 +80,7 @@ namespace SantapanApi.Controllers.V1
         /// <response code="404">Catering not found</response>
         [HttpPut(ApiRoutes.Caterings.Update)]
         [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
-        [ProducesResponseType(typeof(CateringDto), 200)]
+        [ProducesResponseType(typeof(CateringResponse), 200)]
         [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
         public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromBody] UpdateCateringRequest request)
         {
@@ -106,7 +105,7 @@ namespace SantapanApi.Controllers.V1
 
             if (updated)
             {
-                CateringDto cateringDto = new CateringDto
+                CateringResponse cateringDto = new CateringResponse
                 {
                     Id = cateringId,
                     Name = request.Name,
@@ -152,7 +151,7 @@ namespace SantapanApi.Controllers.V1
         /// <response code="200">Returns a catering</response>
         /// <response code="404">Catering not found</response>
         [HttpGet(ApiRoutes.Caterings.Get)]
-        [ProducesResponseType(typeof(CateringDto), 200)]
+        [ProducesResponseType(typeof(CateringResponse), 200)]
         [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
         public async Task<ActionResult> Get([FromRoute] Guid cateringId)
         {
@@ -164,7 +163,7 @@ namespace SantapanApi.Controllers.V1
                     Errors = new[] { "Catering not found." }
                 });
 
-            CateringDto cateringDto = new CateringDto
+            CateringResponse cateringDto = new CateringResponse
             {
                 Id = catering.Id,
                 Name = catering.Name,

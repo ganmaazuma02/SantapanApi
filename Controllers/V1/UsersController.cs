@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
+using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
 using SantapanApi.Domain.Constants;
-using SantapanApi.Dtos;
 using SantapanApi.Services;
 using Sieve.Models;
 using Sieve.Services;
@@ -37,18 +37,18 @@ namespace SantapanApi.Controllers.V1
         /// </summary>
         /// <response code="200">Returns all users</response>
         [HttpGet(ApiRoutes.Users.GetAll)]
-        [ProducesResponseType(typeof(List<SantapanUserDto>), 200)]
+        [ProducesResponseType(typeof(List<SantapanUserResponse>), 200)]
         public async Task<ActionResult> GetAll([FromQuery] SieveModel sieveModel)
         {
             var usersQuery = userService.GetUsersQuery();
             var users = sieveProcessor.Apply(sieveModel, usersQuery).ToList();
 
-            List<SantapanUserDto> userDtos = new List<SantapanUserDto>();
+            List<SantapanUserResponse> userDtos = new List<SantapanUserResponse>();
 
             foreach(var user in users)
             {
                 var roles = await userService.GetRolesFromUserAsync(user);
-                userDtos.Add(new SantapanUserDto
+                userDtos.Add(new SantapanUserResponse
                 {
                     FirstName = user.FirstName,
                     LastName = user.LastName,

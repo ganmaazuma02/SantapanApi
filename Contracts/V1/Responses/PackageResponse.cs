@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Dtos
+namespace SantapanApi.Contracts.V1.Responses
 {
-    public class PackageDto
+    public class PackageResponse
     {
         public Guid Id { get; set; }
 
@@ -19,7 +19,7 @@ namespace SantapanApi.Dtos
 
         public int Price { get; set; }
         public List<string> PackageRequirements { get; set; }
-        public List<PackageOptionDto> PackageOptions { get; set; }
+        public List<PackageOptionResponse> PackageOptions { get; set; }
         public List<string> Menus { get; set; }
     }
 }

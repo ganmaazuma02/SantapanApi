@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SantapanApi.Contracts.V1;
-using SantapanApi.Dtos;
+using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Services;
 using Sieve.Models;
 using Sieve.Services;
@@ -41,7 +41,7 @@ namespace SantapanApi.Controllers.V1
         /// </summary>
         /// <response code="200">Returns all packages for one catering</response>
         [HttpGet(ApiRoutes.Packages.GetPackagesForOneCatering)]
-        [ProducesResponseType(typeof(List<PackageDto>), 200)]
+        [ProducesResponseType(typeof(List<PackageResponse>), 200)]
         public ActionResult GetPackagesForOneCatering([FromQuery]SieveModel sieveModel, [FromRoute] Guid cateringId)
         {
 

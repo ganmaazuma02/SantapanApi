@@ -1,4 +1,4 @@
-﻿using SantapanApi.Dtos;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace SantapanApi.Contracts.V1.Responses
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public List<CateringDto> Caterings { get; set; }
+        public List<CateringResponse> Caterings { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public string Email { get; set; }

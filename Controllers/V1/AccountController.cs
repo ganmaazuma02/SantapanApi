@@ -11,7 +11,6 @@ using SantapanApi.Contracts.V1.Responses;
 using SantapanApi.Domain;
 using SantapanApi.Domain.Constants;
 using SantapanApi.Domain.Entities;
-using SantapanApi.Dtos;
 using SantapanApi.Extensions;
 using SantapanApi.Services;
 
@@ -303,11 +302,11 @@ namespace SantapanApi.V1.Controllers
             if (!result.Success)
                 return NotFound();
 
-            List<CateringDto> cateringDtos = new List<CateringDto>();
+            List<CateringResponse> cateringDtos = new List<CateringResponse>();
 
             foreach (Catering catering in result.Caterings)
             {
-                cateringDtos.Add(new CateringDto
+                cateringDtos.Add(new CateringResponse
                 {
                     Categories = catering.CateringCategories.Select(c => c.Category.Name).ToList(),
                     Details = catering.Details,

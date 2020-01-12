@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SantapanApi.Dtos
+namespace SantapanApi.Contracts.V1.Responses
 {
-    public class SantapanUserDto
+    public class SantapanUserResponse
     {
         public string Email { get; set; }
         public string UserId { get; set; }
