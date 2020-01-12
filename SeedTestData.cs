@@ -78,25 +78,64 @@ namespace SantapanApi
                 new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Dessert), Catering = suriaAiskrimCatering },
                 new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Station), Catering = suriaAiskrimCatering }
             };
-            
+
+            suriaAiskrimCatering.Packages = new List<Package>
+            {
+                new Package 
+                { 
+                    Name = "Bronze Package - 450 kon", 
+                    Catering = suriaAiskrimCatering, 
+                    Description = "Pelbagai perisa", 
+                    Price = 350,
+                    Serves = "450 kon aiskrim",
+                    ServicePresentation = "Seorang pelayan",
+                    SetupTime = "30 minit",
+                    PackageRequirements = new List<PackageRequirement>
+                    {
+                        new PackageRequirement { Name = "Palam elektrik"}
+                    },
+                    Menus = new List<Menu>
+                    {
+                        new Menu { Name = "Aiskrim pilihan 2 perisa (Vanilla/coklat/durian/strawberi/keladi)" }
+                    },
+                    PackageOptions = new List<PackageOption>
+                    {
+                        new PackageOption 
+                        { 
+                            Title = "Pilih perisa aiskrim (2 sahaja)",
+                            OptionsType = PackageOptionsTypes.MultiSelect, 
+                            PackageOptionItems = new List<PackageOptionItem>
+                            { 
+                                new PackageOptionItem { Name = "Vanilla" }, 
+                                new PackageOptionItem { Name = "Coklat" }, 
+                                new PackageOptionItem { Name = "Durian" }, 
+                                new PackageOptionItem { Name = "Strawberi" }, 
+                                new PackageOptionItem { Name = "Keladi" }
+                            }
+                        }
+                    }
+                }
+            };
+
+
             await context.Caterings.AddAsync(suriaAiskrimCatering);
 
             var testCateringUser2 = await userManager.FindByNameAsync("caterer2");
 
-            var nasiTomatoCatering = new Catering
+            var pakChaqCatering = new Catering
             {
-                Name = "Nasi Tomato Pak Chaq",
-                Details = "Nasi tomato dengan ayam masak merah.",
+                Name = "Katering Pak Chaq",
+                Details = "Berpengalaman lebih 7 tahun dalam bidang penyediaan makanan dengan tujuan utama memberikan layanan terbaik kepada pelanggan dengan konsep lengkap dan mewah dalam pakej perkahwinan dan pakej lain.",
                 UserId = testCateringUser2.Id,
                 CreatedAt = DateTime.UtcNow
             };
 
-            nasiTomatoCatering.CateringCategories = new List<CateringCategory>
+            pakChaqCatering.CateringCategories = new List<CateringCategory>
             {
-                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Wedding), Catering = nasiTomatoCatering}
+                new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Wedding), Catering = pakChaqCatering}
             };
 
-            await context.Caterings.AddAsync(nasiTomatoCatering);
+            await context.Caterings.AddAsync(pakChaqCatering);
 
             var testCateringUser3 = await userManager.FindByNameAsync("caterer3");
 

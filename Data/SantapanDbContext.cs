@@ -32,6 +32,11 @@ namespace SantapanApi.Data
         }
 
         public DbSet<Catering> Caterings { get; set; }
+        public DbSet<Package> Packages { get; set; }
+        public DbSet<PackageOption> PackageOptions { get; set; }
+        public DbSet<PackageOptionItem> PackageOptionItems { get; set; }
+        public DbSet<PackageRequirement> PackageRequirements { get; set; }
+        public DbSet<Menu> Menus { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<CateringCategory> CateringCategories { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }

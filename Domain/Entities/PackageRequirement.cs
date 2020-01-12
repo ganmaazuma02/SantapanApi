@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace SantapanApi.Domain.Entities
 {
-    public class SubPackage
+    public class PackageRequirement
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public List<PackageItem> PackageItems { get; set; }
+        public Guid PackageId { get; set; }
+
+        [ForeignKey(nameof(PackageId))]
+        public Package Package { get; set; }
     }
 }

@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace SantapanApi.Domain.Entities
 {
-    public class PackageOptionItem
+    public class Menu
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public bool IsSelected { get; set; }
-        public Guid PackageOptionId { get; set; }
+        public Guid PackageId { get; set; }
 
-        [ForeignKey(nameof(PackageOptionId))]
-        public PackageOption PackageOption { get; set; }
+        [ForeignKey(nameof(PackageId))]
+        public Package Package { get; set; }
+
+        //public List<MenuItem> MenuItems { get; set; }
     }
 }

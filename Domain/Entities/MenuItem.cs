@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SantapanApi.Domain.Entities
 {
-    public class PackageItem
+    public class MenuItem
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
