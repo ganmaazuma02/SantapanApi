@@ -1,11 +1,13 @@
-﻿using System;
+﻿using SantapanApi.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace SantapanApi.Services
 {
-    interface IPackageService
+    public interface IPackageService
     {
+        IQueryable<Package> GetPackagesFromOneCateringQuery(Guid cateringId);
     }
 }

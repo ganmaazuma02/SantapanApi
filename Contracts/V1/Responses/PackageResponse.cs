@@ -18,8 +18,8 @@ namespace SantapanApi.Contracts.V1.Responses
         public string Description { get; set; }
 
         public int Price { get; set; }
-        public List<string> PackageRequirements { get; set; }
-        public List<PackageOptionResponse> PackageOptions { get; set; }
-        public List<string> Menus { get; set; }
+        public string[] PackageRequirements { get; set; }
+        public IEnumerable<PackageOptionResponse> PackageOptions { get; set; }
+        public string[] Menus { get; set; }
     }
 }

@@ -49,6 +49,7 @@ namespace SantapanApi
             services.AddScoped<IAccountService, DefaultAccountService>();
             services.AddScoped<ICateringService, DefaultCateringService>();
             services.AddScoped<IUserService, DefaultUserService>();
+            services.AddScoped<IPackageService, DefaultPackageService>();
             services.AddScoped<SieveProcessor>();
 
             // set no automatic model validation

@@ -10,6 +10,6 @@ namespace SantapanApi.Contracts.V1.Responses
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string OptionsType { get; set; }
-        public List<string> PackageOptionItems { get; set; }
+        public string[] PackageOptionItems { get; set; }
     }
 }
