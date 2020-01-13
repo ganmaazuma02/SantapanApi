@@ -81,14 +81,16 @@ namespace SantapanApi.Controllers.V1
         [HttpPut(ApiRoutes.Caterings.Update)]
         [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
         [ProducesResponseType(typeof(CateringResponse), 200)]
-        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromBody] UpdateCateringRequest request)
         {
             foreach (string category in request.CateringCategories)
             {
                 if (Categories.CategoriesList.Find(c => c == category) == null)
-                    return BadRequest(new CreateCateringFailedResponse()
+                    return BadRequest(new ApiErrorResponse()
                     {
+                        ErrorType = "Bad Request",
+                        StatusCode = 400,
                         Errors = new[] { "Category doesn't exist." }
                     });
             }
@@ -115,8 +117,10 @@ namespace SantapanApi.Controllers.V1
                 return Ok(cateringDto);
             }
 
-            return NotFound(new ResourceNotFoundResponse()
+            return NotFound(new ApiErrorResponse()
             {
+                ErrorType = "Not Found",
+                StatusCode = 404,
                 Errors = new[] { "Catering not found." }
             });
         }
@@ -130,7 +134,7 @@ namespace SantapanApi.Controllers.V1
         [HttpDelete(ApiRoutes.Caterings.Delete)]
         [Authorize(Roles = RoleName.Admin)]
         [ProducesResponseType(typeof(NoContentResult), 204)]
-        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> Delete([FromRoute] Guid cateringId)
         {
             var deleted = await cateringService.DeleteCateringAsync(cateringId);
@@ -138,8 +142,10 @@ namespace SantapanApi.Controllers.V1
             if (deleted)
                 return NoContent();
 
-            return NotFound(new ResourceNotFoundResponse()
+            return NotFound(new ApiErrorResponse()
             {
+                ErrorType = "Not Found",
+                StatusCode = 404,
                 Errors = new[] { "Catering not found." }
             });
         }
@@ -152,14 +158,16 @@ namespace SantapanApi.Controllers.V1
         /// <response code="404">Catering not found</response>
         [HttpGet(ApiRoutes.Caterings.Get)]
         [ProducesResponseType(typeof(CateringResponse), 200)]
-        [ProducesResponseType(typeof(ResourceNotFoundResponse), 404)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> Get([FromRoute] Guid cateringId)
         {
             var catering = await cateringService.GetCateringByIdAsync(cateringId);
 
             if (catering == null)
-                return NotFound(new ResourceNotFoundResponse()
+                return NotFound(new ApiErrorResponse()
                 {
+                    ErrorType = "Not Found",
+                    StatusCode = 404,
                     Errors = new[] { "Catering not found." }
                 });
 
@@ -184,14 +192,24 @@ namespace SantapanApi.Controllers.V1
         [HttpPost(ApiRoutes.Caterings.Create)]
         [Authorize(Roles = RoleName.Admin)]
         [ProducesResponseType(typeof(CreateCateringSuccessResponse), 201)]
-        [ProducesResponseType(typeof(CreateCateringFailedResponse), 400)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<ActionResult> Create([FromBody] CreateCateringRequest request)
         {
+            if(!ModelState.IsValid)
+                return BadRequest(new ApiErrorResponse()
+                {
+                    ErrorType = "Bad Request",
+                    StatusCode = 400,
+                    Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+
             var userResult = await userService.GetCatererOrAdminUserByEmailAsync(request.Email);
 
             if (!userResult.Success)
-                return NotFound(new ResourceNotFoundResponse()
+                return NotFound(new ApiErrorResponse()
                 {
+                    ErrorType = "Not Found",
+                    StatusCode = 404,
                     Errors = userResult.Errors
                 });
 
@@ -199,8 +217,10 @@ namespace SantapanApi.Controllers.V1
             foreach (string category in request.CateringCategories)
             {
                 if (Categories.CategoriesList.Find(c => c == category) == null)
-                    return BadRequest(new CreateCateringFailedResponse()
+                    return BadRequest(new ApiErrorResponse()
                     {
+                        ErrorType = "Bad Request",
+                        StatusCode = 400,
                         Errors = new[] { "Category doesn't exist." }
                     });
             }
@@ -215,8 +235,10 @@ namespace SantapanApi.Controllers.V1
             var created = await cateringService.CreateCateringAsync(catering, request.CateringCategories);
 
             if (!created)
-                return BadRequest(new CreateCateringFailedResponse()
+                return BadRequest(new ApiErrorResponse()
                 {
+                    ErrorType = "Bad Request",
+                    StatusCode = 400,
                     Errors = new[] { "Unable to create a catering." }
                 });
 

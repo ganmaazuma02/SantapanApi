@@ -17,6 +17,13 @@ namespace SantapanApi.Services
             this.context = context;
         }
 
+        public async Task<bool> CreatePackageAsync(Package package)
+        {
+            await context.Packages.AddAsync(package);
+            var created = await context.SaveChangesAsync();
+            return created > 0;
+        }
+
         public IQueryable<Package> GetPackagesFromOneCateringQuery(Guid cateringId)
         {
             //return context.Caterings.Include(c => c.Packages).Single(c => c.Id == cateringId).Packages.AsQueryable();
@@ -28,5 +35,7 @@ namespace SantapanApi.Services
                 .Include(p => p.PackageRequirements)
                 .Where(p => p.CateringId == cateringId);
         }
+
+
     }
 }
