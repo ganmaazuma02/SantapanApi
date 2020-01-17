@@ -35,6 +35,45 @@ namespace SantapanApi.Controllers.V1
             this.sieveProcessor = sieveProcessor;
         }
 
+        /// <summary>
+        /// Returns a package
+        /// </summary>
+        /// <response code="200">Returns a package</response>
+        /// <response code="404">Package doesn't exist</response>
+        [HttpGet(ApiRoutes.Packages.Get)]
+        [ProducesResponseType(typeof(PackageResponse), 200)]
+        [ProducesResponseType(typeof(PackageResponse), 404)]
+        public async Task<ActionResult> Get([FromRoute] Guid packageId)
+        {
+            var package = await packageService.GetPackageByIdAsync(packageId);
+            
+            if(package == null)
+                return NotFound(new ApiErrorResponse()
+                {
+                    ErrorType = "Not Found",
+                    StatusCode = 404,
+                    Errors = new string[] { "Package doesn't exist" }
+                });
+
+            return Ok(new PackageResponse {
+                Id = package.Id,
+                Name = package.Name,
+                Description = package.Description,
+                Serves = package.Serves,
+                Price = package.Price,
+                ServicePresentation = package.ServicePresentation,
+                SetupTime = package.SetupTime,
+                Menus = package.Menus.Select(m => m.Name).ToArray(),
+                PackageOptions = package.PackageOptions.Select(p => new PackageOptionResponse
+                {
+                    Id = p.Id,
+                    OptionsType = p.OptionsType,
+                    PackageOptionItems = p.PackageOptionItems.Select(pi => pi.Name).ToArray(),
+                    Title = p.Title
+                }),
+                PackageRequirements = package.PackageRequirements.Select(p => p.Name).ToArray()
+            });
+        }
 
         /// <summary>
         /// Returns all packages for one catering
@@ -81,10 +120,12 @@ namespace SantapanApi.Controllers.V1
         /// </summary>
         /// <response code="201">Creates a package for a catering</response>
         /// <response code="400">Unable to create a package due to validation error</response>
+        /// <response code="404">Catering doesn't exist</response>
         [HttpPost(ApiRoutes.Packages.CreatePackageForOneCatering)]
         [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
         [ProducesResponseType(typeof(CreatePackageSuccessResponse), 201)]
         [ProducesResponseType(typeof(ApiErrorResponse), 400)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> CreatePackageForOneCatering([FromBody] CreatePackageRequest request, [FromRoute] Guid cateringId)
         {
             if (!ModelState.IsValid)
@@ -140,6 +181,31 @@ namespace SantapanApi.Controllers.V1
             var response = new CreatePackageSuccessResponse() { Id = package.Id };
 
             return Created(locationUrl, response);
+        }
+
+        /// <summary>
+        /// Deletes a package
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <response code="204">Deletes a package</response>
+        /// <response code="404">Package not found</response>
+        [HttpDelete(ApiRoutes.Packages.Delete)]
+        [Authorize(Roles = RoleName.Admin)]
+        [ProducesResponseType(typeof(NoContentResult), 204)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
+        public async Task<ActionResult> Delete([FromRoute] Guid packageId)
+        {
+            var deleted = await packageService.DeletePackageAsync(packageId);
+
+            if (deleted)
+                return NoContent();
+
+            return NotFound(new ApiErrorResponse()
+            {
+                ErrorType = "Not Found",
+                StatusCode = 404,
+                Errors = new[] { "Package not found." }
+            });
         }
     }
 }

@@ -24,6 +24,16 @@ namespace SantapanApi.Services
             return created > 0;
         }
 
+        public async Task<Package> GetPackageByIdAsync(Guid packageId)
+        {
+            return await context.Packages
+                .Include(p => p.Menus)
+                .Include(p => p.PackageOptions)
+                .ThenInclude(o => o.PackageOptionItems)
+                .Include(p => p.PackageRequirements)
+                .SingleOrDefaultAsync(p => p.Id == packageId);
+        }
+
         public IQueryable<Package> GetPackagesFromOneCateringQuery(Guid cateringId)
         {
             //return context.Caterings.Include(c => c.Packages).Single(c => c.Id == cateringId).Packages.AsQueryable();
@@ -34,6 +44,18 @@ namespace SantapanApi.Services
                 .ThenInclude(o => o.PackageOptionItems)
                 .Include(p => p.PackageRequirements)
                 .Where(p => p.CateringId == cateringId);
+        }
+
+        public async Task<bool> DeletePackageAsync(Guid packageId)
+        {
+            var package = await GetPackageByIdAsync(packageId);
+
+            if (package == null)
+                return false;
+
+            context.Packages.Remove(package);
+            var deleted = await context.SaveChangesAsync();
+            return deleted > 0;
         }
 
 
