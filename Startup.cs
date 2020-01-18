@@ -25,6 +25,7 @@ using System.IO;
 using Swashbuckle.AspNetCore.Filters;
 using Sieve.Services;
 using SantapanApi.Domain.Entities;
+using SantapanApi.Filters;
 
 namespace SantapanApi
 {
@@ -50,6 +51,7 @@ namespace SantapanApi
             services.AddScoped<ICateringService, DefaultCateringService>();
             services.AddScoped<IUserService, DefaultUserService>();
             services.AddScoped<IPackageService, DefaultPackageService>();
+            services.AddScoped<ISieveCustomFilterMethods, CateringCategoriesQueryCustomFilter>();
             services.AddScoped<SieveProcessor>();
 
             // set no automatic model validation
