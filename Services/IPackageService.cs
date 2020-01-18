@@ -11,6 +11,7 @@ namespace SantapanApi.Services
         IQueryable<Package> GetPackagesFromOneCateringQuery(Guid cateringId);
 
         Task<bool> CreatePackageAsync(Package package);
+        Task<bool> UpdatePackageAsync(Package packageToUpdate, Guid cateringId);
         Task<Package> GetPackageByIdAsync(Guid packageId);
         Task<bool> DeletePackageAsync(Guid packageId);
     }

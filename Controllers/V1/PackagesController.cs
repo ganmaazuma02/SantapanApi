@@ -63,15 +63,27 @@ namespace SantapanApi.Controllers.V1
                 Price = package.Price,
                 ServicePresentation = package.ServicePresentation,
                 SetupTime = package.SetupTime,
-                Menus = package.Menus.Select(m => m.Name).ToArray(),
+                Menus = package.Menus.Select(m => new MenuResponse 
+                { 
+                    Id = m.Id,
+                    Name = m.Name
+                }),
                 PackageOptions = package.PackageOptions.Select(p => new PackageOptionResponse
                 {
                     Id = p.Id,
                     OptionsType = p.OptionsType,
-                    PackageOptionItems = p.PackageOptionItems.Select(pi => pi.Name).ToArray(),
+                    PackageOptionItems = p.PackageOptionItems.Select(pi => new PackageOptionItemResponse
+                    {
+                        Id = pi.Id,
+                        Name = pi.Name
+                    }),
                     Title = p.Title
                 }),
-                PackageRequirements = package.PackageRequirements.Select(p => p.Name).ToArray()
+                PackageRequirements = package.PackageRequirements.Select(p => new PackageRequirementResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                })
             });
         }
 
@@ -99,15 +111,27 @@ namespace SantapanApi.Controllers.V1
                     Price = package.Price,
                     ServicePresentation = package.ServicePresentation,
                     SetupTime = package.SetupTime,
-                    Menus = package.Menus.Select(m => m.Name).ToArray(),
+                    Menus = package.Menus.Select(m => new MenuResponse
+                    {
+                        Id = m.Id,
+                        Name = m.Name
+                    }),
                     PackageOptions = package.PackageOptions.Select(p => new PackageOptionResponse 
                     { 
                         Id = p.Id,
                         OptionsType = p.OptionsType,
-                        PackageOptionItems = p.PackageOptionItems.Select(pi => pi.Name).ToArray(),
+                        PackageOptionItems = p.PackageOptionItems.Select(pi => new PackageOptionItemResponse
+                        {
+                            Id = pi.Id,
+                            Name = pi.Name
+                        }),
                         Title = p.Title
                     }),
-                    PackageRequirements = package.PackageRequirements.Select(p => p.Name).ToArray()
+                    PackageRequirements = package.PackageRequirements.Select(p => new PackageRequirementResponse
+                    {
+                        Id = p.Id,
+                        Name = p.Name
+                    })
                 });
             }
 
@@ -184,13 +208,110 @@ namespace SantapanApi.Controllers.V1
         }
 
         /// <summary>
+        /// Updates a package
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <param name="cateringId"></param>
+        /// <param name="request"></param>
+        /// <response code="200">Updates a package</response>
+        /// <response code="404">Package not found</response>
+        [HttpPut(ApiRoutes.Packages.Update)]
+        [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
+        [ProducesResponseType(typeof(PackageResponse), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 404)]
+        public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromRoute] Guid packageId, [FromBody] UpdatePackageRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiErrorResponse()
+                {
+                    ErrorType = "Bad Request",
+                    StatusCode = 400,
+                    Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+
+            var package = new Package
+            {
+                Id = packageId,
+                Name = request.Name,
+                Serves = request.Serves,
+                ServicePresentation = request.ServicePresentation,
+                SetupTime = request.SetupTime,
+                Description = request.Description,
+                Price = request.Price,
+                Menus = request.Menus.Select(m => new Menu
+                {
+                    Id = m.Id,
+                    Name = m.Name
+                }).ToList(),
+                PackageRequirements = request.PackageRequirements.Select(p => new PackageRequirement
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                }).ToList(),
+                PackageOptions = request.PackageOptions.Select(p => new PackageOption
+                {
+                    Id = p.Id,
+                    OptionsType = p.OptionsType,
+                    Title = p.Title,
+                    PackageOptionItems = p.PackageOptionItems.Select(pi => new PackageOptionItem
+                    {
+                        Id = pi.Id,
+                        Name = pi.Name
+                    }).ToList()
+                }).ToList()
+            };
+
+            var updated = await packageService.UpdatePackageAsync(package, cateringId);
+
+            if (updated)
+                return Ok(new PackageResponse
+                {
+                    Id = package.Id,
+                    Name = package.Name,
+                    Description = package.Description,
+                    Serves = package.Serves,
+                    Price = package.Price,
+                    ServicePresentation = package.ServicePresentation,
+                    SetupTime = package.SetupTime,
+                    Menus = package.Menus.Select(m => new MenuResponse
+                    {
+                        Id = m.Id,
+                        Name = m.Name
+                    }),
+                    PackageOptions = package.PackageOptions.Select(p => new PackageOptionResponse
+                    {
+                        Id = p.Id,
+                        OptionsType = p.OptionsType,
+                        PackageOptionItems = p.PackageOptionItems.Select(pi => new PackageOptionItemResponse
+                        {
+                            Id = pi.Id,
+                            Name = pi.Name
+                        }),
+                        Title = p.Title
+                    }),
+                    PackageRequirements = package.PackageRequirements.Select(p => new PackageRequirementResponse
+                    {
+                        Id = p.Id,
+                        Name = p.Name
+                    })
+                });
+
+            return NotFound(new ApiErrorResponse()
+            {
+                ErrorType = "Not Found",
+                StatusCode = 404,
+                Errors = new[] { "Package not found." }
+            });
+        }
+
+        /// <summary>
         /// Deletes a package
         /// </summary>
         /// <param name="packageId"></param>
         /// <response code="204">Deletes a package</response>
         /// <response code="404">Package not found</response>
         [HttpDelete(ApiRoutes.Packages.Delete)]
-        [Authorize(Roles = RoleName.Admin)]
+        [Authorize(Roles = RoleName.Admin + "," + RoleName.Caterer)]
         [ProducesResponseType(typeof(NoContentResult), 204)]
         [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> Delete([FromRoute] Guid packageId)

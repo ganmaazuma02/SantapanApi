@@ -43,7 +43,7 @@ namespace SantapanApi.Contracts.V1
             public const string GetPackagesForOneCatering = Base + "/caterings/{cateringId}/packages";
             public const string GetAll = Base + "/packages";
             public const string Get = Base + "/packages/{packageId}";
-            public const string Update = Base + "/packages/{packageId}";
+            public const string Update = Base + "/caterings/{cateringId}/packages/{packageId}";
             public const string Delete = Base + "/packages/{packageId}";
             public const string CreatePackageForOneCatering = Base + "/caterings/{cateringId}/packages";
         }

@@ -58,6 +58,13 @@ namespace SantapanApi.Services
             return deleted > 0;
         }
 
+        public async Task<bool> UpdatePackageAsync(Package packageToUpdate, Guid cateringId)
+        {
+            packageToUpdate.CateringId = cateringId;
 
+            context.Packages.Update(packageToUpdate);
+            var updated = await context.SaveChangesAsync();
+            return updated > 0;
+        }
     }
 }
