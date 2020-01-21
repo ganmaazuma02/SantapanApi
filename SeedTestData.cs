@@ -70,7 +70,16 @@ namespace SantapanApi
                 Name = "Suria Aiskrim",
                 Details = "Aiskrim pelbagai perisa! Lick it, love it!",
                 UserId = testCateringUser.Id,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                SSM = "105015-K",
+                CompanyName = "Suria Sejukbeku Sdn. Bhd.",
+                Street1 = "No. 131, Jalan Anggerik 1/4",
+                Street2 = "Bandar Amanjaya",
+                Postcode = "08000",
+                State = "Kedah",
+                City = "Sungai Petani",
+                Longitude = 100.542240,
+                Latitude = 5.637992
             };
 
             suriaAiskrimCatering.CateringCategories = new List<CateringCategory> 
@@ -127,7 +136,16 @@ namespace SantapanApi
                 Name = "Katering Pak Chaq",
                 Details = "Berpengalaman lebih 7 tahun dalam bidang penyediaan makanan dengan tujuan utama memberikan layanan terbaik kepada pelanggan dengan konsep lengkap dan mewah dalam pakej perkahwinan dan pakej lain.",
                 UserId = testCateringUser2.Id,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                SSM = "105016-K",
+                CompanyName = "A tu Z Wedding House Sdn.Bhd.",
+                Street1 = "2531, 2532, 2533, Kawasan S.P.T Perindustrian",
+                Street2 = "Seberang, Jalan Jelawat, Seberang Jaya",
+                Postcode = "13700",
+                State = "Pulau Pinang",
+                City = "Perai",
+                Longitude = 100.395528,
+                Latitude = 5.402835
             };
 
             pakChaqCatering.CateringCategories = new List<CateringCategory>
@@ -144,7 +162,16 @@ namespace SantapanApi
                 Name = "Kambing Bakar Mak Minah",
                 Details = "Stesen kambing bakar",
                 UserId = testCateringUser3.Id,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                SSM = "105017-K",
+                CompanyName = "Aminah Resources Sdn.Bhd.",
+                Street1 = "485-487, Jalan Permatang Rawa",
+                Street2 = " Bandar Perda",
+                Postcode = "14000",
+                State = "Pulau Pinang",
+                City = "Bukit Mertajam",
+                Longitude = 100.438167,
+                Latitude = 5.366525
             };
 
             kambingBakarCatering.CateringCategories = new List<CateringCategory>

@@ -63,7 +63,16 @@ namespace SantapanApi.Controllers.V1
                     Details = catering.Details,
                     Name = catering.Name,
                     UserId = catering.UserId,
-                    CreatedAt = catering.CreatedAt
+                    CreatedAt = catering.CreatedAt,
+                    SSM = catering.SSM,
+                    CompanyName = catering.CompanyName,
+                    State = catering.State,
+                    City =catering.City,
+                    Street1 = catering.Street1,
+                    Street2 = catering.Street2,
+                    Latitude = catering.Latitude,
+                    Longitude = catering.Longitude,
+                    Postcode = catering.Postcode
                 });
             }
 
