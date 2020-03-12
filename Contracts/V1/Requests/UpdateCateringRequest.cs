@@ -11,5 +11,6 @@ namespace SantapanApi.Contracts.V1.Requests
         public string Details { get; set; }
 
         public string[] CateringCategories { get; set; }
+        public IEnumerable<UpdateCateringUnavailabilityRequest> CateringUnavailabilities { get; set; }
     }
 }

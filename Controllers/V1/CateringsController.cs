@@ -93,6 +93,7 @@ namespace SantapanApi.Controllers.V1
         [ProducesResponseType(typeof(ApiErrorResponse), 404)]
         public async Task<ActionResult> Update([FromRoute] Guid cateringId, [FromBody] UpdateCateringRequest request)
         {
+            // validate static category list
             foreach (string category in request.CateringCategories)
             {
                 if (Categories.CategoriesList.Find(c => c == category) == null)
@@ -101,6 +102,18 @@ namespace SantapanApi.Controllers.V1
                         ErrorType = "Bad Request",
                         StatusCode = 400,
                         Errors = new[] { "Category doesn't exist." }
+                    });
+            }
+
+            // validate static session list
+            foreach (UpdateCateringUnavailabilityRequest unavailability in request.CateringUnavailabilities)
+            {
+                if (CateringSession.sessionsList.Find(u => u == unavailability.Session) == null)
+                    return BadRequest(new ApiErrorResponse()
+                    {
+                        ErrorType = "Bad Request",
+                        StatusCode = 400,
+                        Errors = new[] { "Session doesn't exist." }
                     });
             }
 

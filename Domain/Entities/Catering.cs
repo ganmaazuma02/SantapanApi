@@ -31,7 +31,7 @@ namespace SantapanApi.Domain.Entities
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 
-
+        public List<CateringUnavailability> CateringUnavailabilities { get; set; }
         public List<CateringCategory> CateringCategories { get; set; }
         public List<Package> Packages { get; set; }
 

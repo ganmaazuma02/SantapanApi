@@ -88,6 +88,11 @@ namespace SantapanApi
                 new CateringCategory { Category = context.Categories.Single(c => c.Name == Categories.Station), Catering = suriaAiskrimCatering }
             };
 
+            suriaAiskrimCatering.CateringUnavailabilities = new List<CateringUnavailability>
+            {
+                new CateringUnavailability { UnavailableDate = new DateTime(2020, 1, 30), Session = CateringSession.Morning, Catering = suriaAiskrimCatering }
+            };
+
             suriaAiskrimCatering.Packages = new List<Package>
             {
                 new Package 

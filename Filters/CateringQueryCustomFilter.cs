@@ -9,8 +9,16 @@ using System.Threading.Tasks;
 
 namespace SantapanApi.Filters
 {
-    public class CateringCategoriesQueryCustomFilter : ISieveCustomFilterMethods
+    public class CateringQueryCustomFilter : ISieveCustomFilterMethods
     {
+        public IQueryable<Catering> IsAvailableWhen(IQueryable<Catering> source, string op, string[] values)
+        {
+            DateTime dateTimeRequest = Convert.ToDateTime(values[0]);
+
+            var result = source.Where(c => !c.CateringUnavailabilities.Any(cu => cu.UnavailableDate == dateTimeRequest && cu.Session == values[1]));
+            return result;
+        }
+
         public IQueryable<Catering> CategoryIsAnyOf(IQueryable<Catering> source, string op, string[] values)
         {
             var result = source.Where(c => c.CateringCategories.Any(cc => values.Contains(cc.Category.Name)));

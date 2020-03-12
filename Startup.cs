@@ -51,7 +51,7 @@ namespace SantapanApi
             services.AddScoped<ICateringService, DefaultCateringService>();
             services.AddScoped<IUserService, DefaultUserService>();
             services.AddScoped<IPackageService, DefaultPackageService>();
-            services.AddScoped<ISieveCustomFilterMethods, CateringCategoriesQueryCustomFilter>();
+            services.AddScoped<ISieveCustomFilterMethods, CateringQueryCustomFilter>();
             services.AddScoped<SieveProcessor>();
 
             // set no automatic model validation
